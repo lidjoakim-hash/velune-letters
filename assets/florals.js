@@ -182,3 +182,18 @@ export const meadow = (id) => asImg(`m:${id}`, () => _meadow(id));
 export const sealSprig = (id) => asImg(`s:${id}`, () => _sealSprig(id));
 // the monogram is HTML on top of the image so it uses the real script font
 export const wreath = (id, text = "") => asImg(`w:${id}`, () => _wreath(id, "")) + (text ? `<span class="wr-t" style="color:${flora(id).gold}">${text}</span>` : "");
+
+// Envelope lining: a dense floral pattern used as a CSS background url()
+const LINERS = new Map();
+export function linerURL(id) {
+  if (!LINERS.has(id)) {
+    const P = flora(id), u = 1;
+    let g = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200">${defs(u, P)}<rect width="300" height="200" fill="${P.p1}"/><rect width="300" height="200" fill="${P.p2}" opacity=".25"/><g transform="translate(0 200) scale(1 -1)">`;
+    g += eucalyptus(u, 20, 190, 200, 60, 8) + eucalyptus(u, 280, 190, 200, -60, 8) + sprig(u, 150, 200, 170, 0, 5, 1.1);
+    g += sprig(u, 60, 200, 140, 30, 4, .9) + sprig(u, 240, 200, 140, -30, 4, .9);
+    g += rose(u, 70, 110, 26, 10) + rose(u, 230, 110, 26, -20) + peony(u, 150, 80, 40, 0) + bud(u, 110, 50, 9, -30) + bud(u, 190, 50, 9, 30);
+    g += blossom(u, 40, 70, 7, P.p2, P.b) + blossom(u, 260, 70, 7, P.p2, P.b) + blossom(u, 110, 150, 6, P.p1, P.b) + blossom(u, 190, 150, 6, P.p1, P.b) + `</g></svg>`;
+    LINERS.set(id, `url("data:image/svg+xml;charset=utf-8,${encodeURIComponent(g)}")`);
+  }
+  return LINERS.get(id);
+}

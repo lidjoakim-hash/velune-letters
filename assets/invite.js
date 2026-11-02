@@ -1,7 +1,7 @@
 // Velune Letters · the invitation guests open
 import { T, fmtDate, LANGS } from "./i18n.js";
 import { THEMES, draw } from "./themes.js";
-import { bouquet, divider, wreath, meadow, sealSprig } from "./florals.js";
+import { bouquet, divider, wreath, meadow, sealSprig, linerURL } from "./florals.js";
 import { features } from "./config.js";
 
 export const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -103,7 +103,7 @@ export function renderInvite(root, raw, opts = {}) {
   const t = T[d.lang], th = THEMES[d.theme], v = th.v;
   const wasOpen = root.classList.contains("opened");
   root.className = "inv" + (opts.keepOpen && wasOpen ? " opened" : "");
-  root.style.cssText = `--i-bg:${v.bg};--i-paper:${v.paper};--i-ink:${v.ink};--i-muted:${v.muted};--i-accent:${v.accent};--i-seal:${v.seal};--i-env:${v.env};--i-display:${th.display}`;
+  root.style.cssText = `--i-liner:${linerURL(d.theme)};--i-bg:${v.bg};--i-paper:${v.paper};--i-ink:${v.ink};--i-muted:${v.muted};--i-accent:${v.accent};--i-seal:${v.seal};--i-env:${v.env};--i-display:${th.display}`;
   const maps = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(d.address || d.venue + " " + d.city);
   const sched = d.schedule.filter((s) => s.t || s.x || s.k).map((s) => `<li><time>${esc(s.t)}</time><span>${esc(s.x || t[s.k] || "")}</span></li>`).join("");
   const langs = f.multiLang ? d.langs.filter((l) => T[l]) : [];
@@ -121,6 +121,8 @@ export function renderInvite(root, raw, opts = {}) {
     ${corners("fl-tl", "fl-br")}
     ${g ? `<p class="kicker">${esc(t.dear.replace("{n}", g.name))}</p>` : ""}
     <div class="env">
+      <div class="env-glow"></div>
+      <i class="twk" style="--x:-8%;--y:12%;--d:0s"></i><i class="twk" style="--x:104%;--y:20%;--d:.7s"></i><i class="twk" style="--x:96%;--y:92%;--d:1.4s"></i><i class="twk" style="--x:2%;--y:84%;--d:2.1s"></i><i class="twk" style="--x:50%;--y:-10%;--d:1s"></i>
       <div class="env-back"></div>
       <div class="env-letter">${esc(d.p1)} &amp; ${esc(d.p2)}</div>
       <div class="env-front"></div>
@@ -187,7 +189,8 @@ export function renderInvite(root, raw, opts = {}) {
     if (musicOn) Music.start();
     if (reduce) { open(); return; }
     root.classList.add("opening");
-    setTimeout(() => { root.classList.remove("opening"); open(); }, 2150);
+    burst(root);
+    setTimeout(() => { root.classList.remove("opening"); open(); }, 2750);
   });
   const mus = root.querySelector(".mus"); if (mus) mus.addEventListener("click", () => Music.toggle());
   root.querySelectorAll("[data-ilang]").forEach((b) => b.addEventListener("click", () => opts.onLang && opts.onLang(b.dataset.ilang)));
@@ -198,6 +201,36 @@ export function renderInvite(root, raw, opts = {}) {
   tick();
   if (root.classList.contains("opened")) { requestAnimationFrame(paint); startPetals(); }
   return { open };
+}
+
+/* ---------- seal crack, gold sparks and petal burst ---------- */
+function burst(root) {
+  const env = root.querySelector(".env"), seal = root.querySelector(".seal");
+  if (!env || !seal || !env.animate) return;
+  const cs = getComputedStyle(root), sealCol = cs.getPropertyValue("--i-seal").trim() || "#9A7C52", acc = cs.getPropertyValue("--i-accent").trim() || "#B8924F";
+  const add = (cls, css) => { const e = document.createElement("i"); e.className = cls; e.style.cssText = css; env.appendChild(e); return e; };
+  // wax halves
+  [["l", -1], ["r", 1]].forEach(([side, dir]) => {
+    const h = add("shard " + side, "");
+    h.animate([{ transform: "translate(0,0) rotate(0)", opacity: 1 }, { transform: `translate(${dir * 46}px,70px) rotate(${dir * 38}deg)`, opacity: 0 }], { duration: 900, easing: "cubic-bezier(.3,.6,.4,1)", fill: "forwards" });
+  });
+  // gold sparks
+  for (let i = 0; i < 22; i++) {
+    const a = (i / 22) * Math.PI * 2 + Math.random() * .3, r = 70 + Math.random() * 90, s = 3 + Math.random() * 4;
+    const sp = add("spark", `width:${s}px;height:${s}px`);
+    sp.animate([{ transform: "translate(-50%,-50%) scale(1)", opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(a) * r}px),calc(-50% + ${Math.sin(a) * r}px)) scale(.2)`, opacity: 0 }], { duration: 700 + Math.random() * 500, easing: "cubic-bezier(.1,.7,.3,1)", fill: "forwards" });
+  }
+  // petals fly up out of the envelope, then drift down
+  for (let i = 0; i < 18; i++) {
+    const dx = (Math.random() - .5) * 360, up = -(140 + Math.random() * 180), w = 8 + Math.random() * 8;
+    const pe = add("bpetal", `width:${w}px;height:${w * .6}px;background:${i % 2 ? sealCol : acc}`);
+    const r1 = Math.random() * 360, r2 = r1 + (Math.random() - .5) * 540;
+    pe.animate([
+      { transform: `translate(-50%,-50%) rotate(${r1}deg)`, opacity: 0 },
+      { transform: `translate(calc(-50% + ${dx * .6}px),calc(-50% + ${up}px)) rotate(${(r1 + r2) / 2}deg)`, opacity: .9, offset: .35 },
+      { transform: `translate(calc(-50% + ${dx}px),calc(-50% + ${up + 420}px)) rotate(${r2}deg)`, opacity: 0 }
+    ], { duration: 2200 + Math.random() * 700, delay: 250 + Math.random() * 250, easing: "cubic-bezier(.2,.6,.4,1)", fill: "forwards" });
+  }
 }
 
 /* ---------- falling petals ---------- */

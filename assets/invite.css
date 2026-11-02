@@ -127,3 +127,37 @@
 .env .fl-seal img{width:100%;height:auto;display:block}
 .env .seal{z-index:6}
 .inv.opening .fl-seal{opacity:0}
+
+/* ===== the grand opening ===== */
+.inv .stage .env{width:min(320px,86%)}
+.env{animation:envfloat 4.5s ease-in-out infinite}
+@keyframes envfloat{50%{transform:translateY(-6px) rotate(-.4deg)}}
+.env-glow{inset:-30%;z-index:0;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--i-accent) 45%,#fff3d6) 0%,color-mix(in srgb,var(--i-accent) 18%,transparent) 45%,transparent 70%);opacity:.35;animation:glowp 3.2s ease-in-out infinite;pointer-events:none}
+@keyframes glowp{50%{opacity:.6;transform:scale(1.05)}}
+.env .twk{position:absolute;left:var(--x);top:var(--y);width:10px;height:10px;z-index:6;pointer-events:none;background:radial-gradient(circle,#fff 0 18%,color-mix(in srgb,var(--i-accent) 70%,#fff) 30%,transparent 62%);clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);animation:twinkle 2.8s ease-in-out var(--d) infinite;opacity:0}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.4) rotate(0)}50%{opacity:1;transform:scale(1.4) rotate(45deg)}}
+.seal{animation:sealpulse 2.4s ease-in-out infinite}
+@keyframes sealpulse{0%,100%{box-shadow:0 4px 10px rgba(0,0,0,.35),0 0 0 5px color-mix(in srgb,var(--i-seal) 85%,#000) inset,0 0 0 0 color-mix(in srgb,var(--i-accent) 55%,transparent)}50%{box-shadow:0 4px 10px rgba(0,0,0,.35),0 0 0 5px color-mix(in srgb,var(--i-seal) 85%,#000) inset,0 0 0 14px color-mix(in srgb,var(--i-accent) 0%,transparent)}}
+/* wax halves, sparks, burst petals */
+.env .shard{position:absolute;left:50%;top:52%;width:34px;height:68px;margin-top:-34px;z-index:7;pointer-events:none;background:radial-gradient(circle at 70% 30%,color-mix(in srgb,var(--i-seal) 70%,#fff),var(--i-seal) 55%,color-mix(in srgb,var(--i-seal) 70%,#000));box-shadow:0 4px 10px rgba(0,0,0,.3)}
+.env .shard.l{margin-left:-35px;border-radius:34px 0 0 34px;clip-path:polygon(0 0,100% 0,88% 22%,100% 44%,84% 66%,100% 84%,92% 100%,0 100%)}
+.env .shard.r{margin-left:1px;border-radius:0 34px 34px 0;clip-path:polygon(0 0,100% 0,100% 100%,8% 100%,0 84%,16% 66%,0 44%,12% 22%)}
+.env .spark{position:absolute;left:50%;top:52%;z-index:8;border-radius:50%;pointer-events:none;background:radial-gradient(circle,#fffbe8,color-mix(in srgb,var(--i-accent) 80%,#fff3c4) 60%,transparent);box-shadow:0 0 8px 2px color-mix(in srgb,var(--i-accent) 70%,#fff2c0)}
+.env .bpetal{position:absolute;left:50%;top:45%;z-index:8;border-radius:60% 40% 60% 40%/70% 50% 50% 30%;pointer-events:none;opacity:0}
+/* flap opens to a floral lining, letter rises and zooms into the invitation */
+.inv.opening .env{animation:none}
+.inv.opening .seal{transform:scale(.5);opacity:0;transition:transform .25s ease,opacity .2s ease}
+.inv.opening .env-flap{animation:flapopen .9s cubic-bezier(.45,.1,.3,1) .2s both;transition:none}
+@keyframes flapopen{0%{transform:rotateX(0);z-index:4}49%{background:color-mix(in srgb,var(--i-env) 92%,#000);z-index:4}50%{background:var(--i-liner) center top/100% auto,var(--i-env);z-index:1}100%{transform:rotateX(180deg);background:var(--i-liner) center top/100% auto,var(--i-env);z-index:1}}
+.inv.opening .env-glow{animation:glowburst 1.6s ease-out .2s forwards}
+@keyframes glowburst{0%{opacity:.4;transform:scale(1)}40%{opacity:1;transform:scale(1.6)}100%{opacity:0;transform:scale(2.4)}}
+.inv.opening .env-letter{animation:letterout 2s cubic-bezier(.5,0,.2,1) .6s both;transition:none}
+@keyframes letterout{0%{transform:translateY(0)}35%{transform:translateY(-62%)}50%{transform:translateY(-62%) scale(1.03);z-index:2}52%{z-index:9}100%{z-index:9;transform:translateY(-10%) scale(4.4);box-shadow:0 0 0 rgba(0,0,0,0)}}
+.inv.opening .env-front,.inv.opening .env-back,.inv.opening .fl-seal{animation:envdrop .8s ease-in 1.6s both}
+@keyframes envdrop{to{opacity:0;transform:translateY(60px)}}
+.inv.opening .stage .names,.inv.opening .stage .tap,.inv.opening .stage .kicker,.inv.opening .stage>.fl-c{transition:opacity .5s;opacity:0}
+.inv.opening .stage{animation:fadeout .4s ease 2.35s both}
+@keyframes fadeout{to{opacity:0}}
+.inv.opened .sheet{animation:reveal 1s cubic-bezier(.2,.8,.2,1)}
+@keyframes reveal{from{opacity:0;transform:scale(1.03);filter:brightness(1.15)}}
+@media (prefers-reduced-motion:reduce){.env,.seal,.env-glow,.env .twk{animation:none!important}}
