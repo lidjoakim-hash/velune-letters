@@ -2,6 +2,8 @@
 import { api, LIVE } from "./api.js";
 import { PLANS, PLAN_ORDER, inviteUrl, CONFIG } from "./config.js";
 const PAY = !LIVE || CONFIG.PAYMENTS;
+const LINKS = LIVE && CONFIG.PAYMENTS && CONFIG.PAYMENT_LINKS;
+const pend = { get() { try { return JSON.parse(localStorage.getItem("vl-pay") || "null"); } catch (e) { return null; } }, set(v) { try { v ? localStorage.setItem("vl-pay", JSON.stringify(v)) : localStorage.removeItem("vl-pay"); } catch (e) {} } };
 import { T, LANGS, fmtDate } from "./i18n.js";
 import { THEMES, draw } from "./themes.js";
 import { renderInvite, withDefaults, esc, Music, clone } from "./invite.js";
@@ -45,7 +47,8 @@ async function start() {
   if (!user) return renderLogin();
   try { isAdmin = await api.isAdmin(); } catch (e) { isAdmin = false; }
   $("#nav-admin").hidden = !isAdmin;
-  const id = params.get("id");
+  let id = params.get("id");
+  if (!id && params.get("paid") && pend.get()) id = pend.get().id;
   if (id) openWorkspace(id); else renderList();
 }
 $("#nav-out").onclick = async () => { await api.signOut(); user = null; history.replaceState(null, "", "studio.html"); params.delete("id"); start(); };
@@ -118,7 +121,16 @@ async function openWorkspace(id, push, startTab) {
     [guests, rsvps] = await Promise.all([api.listGuests(id), api.listRsvps(id)]);
   } catch (e) { app.innerHTML = `<div class="wrap app"><p class="msg err">${esc(e.message)}</p><p style="margin-top:14px"><a class="btn small" href="studio.html">Back to my invitations</a></p></div>`; return; }
 
-  if (params.get("paid")) { params.delete("paid"); history.replaceState(null, "", `studio.html?id=${id}#publish`); tab = "publish"; waitForPayment(); }
+  if (params.get("paid")) {
+    const session = params.get("paid"); params.delete("paid"); history.replaceState(null, "", `studio.html?id=${id}#publish`); tab = "publish";
+    if (LINKS) {
+      const p = pend.get(); pend.set(null);
+      const plan = (p && p.id === id && p.plan) || "signature";
+      inv.data.request = { plan, paid: true, session, at: new Date().toISOString() };
+      try { await api.updateInvitation(inv.id, { data: inv.data }); } catch (e) {}
+      toast("Thank you! Payment received. Your invitation goes live within a few hours.");
+    } else waitForPayment();
+  }
   renderWorkspace();
 }
 async function waitForPayment() {
@@ -399,7 +411,7 @@ function panePublish() {
       ${current ? `<p class="eyebrow" style="color:var(--ok)">Your plan</p>` : k === "signature" && !paid ? `<p class="eyebrow">Most chosen</p>` : ""}
       <h3>${esc(p.name)}</h3><div class="amt">${euro(p.price)} <small>per wedding</small></div>
       <ul>${p.features.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
-      ${current || lower ? "" : PAY ? `<button class="btn ${k === "signature" ? "primary" : ""}" data-buy="${k}">${paid ? `Upgrade for ${euro(cost)}` : `Pay ${euro(cost)} and publish`}</button>` : (inv.data.request && inv.data.request.plan === k) ? `<p class="msg">Requested. We publish within 24 hours.</p>` : `<button class="btn ${k === "signature" ? "primary" : ""}" data-req="${k}">Request ${esc(p.name)}</button>`}
+      ${current || lower ? "" : (inv.data.request && inv.data.request.paid && inv.data.request.plan === k) ? `<p class="msg">Paid. We publish your invitation within a few hours.</p>` : PAY && !(LINKS && paid) ? `<button class="btn ${k === "signature" ? "primary" : ""}" data-buy="${k}">${paid ? `Upgrade for ${euro(cost)}` : `Pay ${euro(cost)} and publish`}</button>` : (inv.data.request && inv.data.request.plan === k) ? `<p class="msg">Requested. We publish within 24 hours.</p>` : `<button class="btn ${k === "signature" ? "primary" : ""}" data-req="${k}">Request ${esc(p.name)}</button>`}
     </div>`; }).join("");
   pane.innerHTML = `
     ${paid ? `<div class="panel" style="margin-top:0"><h2>Your invitation</h2>
@@ -414,7 +426,7 @@ function panePublish() {
         </div></div></div>
       ${curIdx < PLAN_ORDER.length - 1 ? `<div class="panel"><h2>Upgrade</h2><p class="hint" style="margin:0 0 16px">You only pay the difference.</p><div class="planrow">${plans}</div></div>` : ""}`
     : `<div class="panel" style="margin-top:0"><h2>Publish</h2><p>Choose a plan to make your invitation live. You pay once, and it stays online until 12 months after the wedding.</p>
-      ${PAY ? `<p class="hint">Booked Velune Weddings? Enter the code from your planner on the payment page and Signature is free.</p>` : `<p class="hint">Choose a plan and press Request. We confirm by email and publish within 24 hours.</p>`}</div>
+      ${LINKS ? `<p class="hint">Secure card payment by Stripe. Booked Velune Weddings? Write to us and we'll gift you Signature.</p>` : PAY ? `<p class="hint">Booked Velune Weddings? Enter the code from your planner on the payment page and Signature is free.</p>` : `<p class="hint">Choose a plan and press Request. We confirm by email and publish within 24 hours.</p>`}</div>
       <div class="planrow" style="margin-top:20px">${plans}</div>
       ${!LIVE ? `<p class="msg" style="margin-top:16px">Demo mode: payment is simulated and the invitation goes live straight away.</p>` : ""}`}
     <div class="panel"><h2>Delete</h2><p class="hint" style="margin:0 0 12px">Removes the invitation, guest list and replies for good.</p><button class="btn small danger" id="del">Delete invitation</button></div>`;
@@ -426,7 +438,7 @@ function panePublish() {
     b.disabled = true; const label = b.textContent; b.textContent = "Opening payment…";
     try {
       const r = await api.checkout(inv.id, b.dataset.buy);
-      if (r.url) { location.href = r.url; return; }
+      if (r.url) { if (r.link) pend.set({ id: inv.id, plan: b.dataset.buy }); location.href = r.url; return; }
       inv = Object.assign(inv, await api.getInvitation(inv.id)); inv.data = withDefaults(inv.data);
       toast("Payment received. Your invitation is live"); renderWorkspace();
     } catch (e) { toast(e.message); b.disabled = false; b.textContent = label; }

@@ -51,7 +51,7 @@ function render() {
     ${shown.map((r) => `<tr><td><a href="${esc(inviteUrl(r.slug))}" target="_blank" rel="noopener" style="color:inherit">${esc(r.couple || "–")}</a><div class="gstat">${esc(r.slug)}</div></td>
       <td>${r.email ? `${esc(r.email)}` : "–"}</td><td class="num">${esc(r.wedding_date || "–")}</td>
       <td><span class="st ${r.status}">${r.status === "live" ? "Live" : r.paid_at ? "Paused" : "Draft"}</span></td>
-      <td>${r.plan ? esc(PLANS[r.plan].name) + (r.comp ? " · gifted" : "") : "–"}${r.requested && r.requested !== r.plan ? `<div class="gstat opened">Requested ${esc(PLANS[r.requested] ? PLANS[r.requested].name : r.requested)}</div>` : ""}</td><td class="num">${euro(Number(r.revenue || 0))}</td>
+      <td>${r.plan ? esc(PLANS[r.plan].name) + (r.comp ? " · gifted" : "") : "–"}${r.requested && r.requested !== r.plan ? `<div class="gstat opened">Requested / paid ${esc(PLANS[r.requested] ? PLANS[r.requested].name : r.requested)}</div>` : ""}</td><td class="num">${euro(Number(r.revenue || 0))}</td>
       <td class="num">${r.guests}</td><td class="num">${r.replies} <span class="gstat">(${r.coming} coming)</span></td>
       <td><div style="display:flex;gap:6px"><select data-plan="${r.id}" data-req="${esc(r.requested || "")}" aria-label="Plan" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:.3em">${PLAN_ORDER.map((p) => `<option value="${p}" ${p === (r.requested || r.plan || "signature") ? "selected" : ""}>${esc(PLANS[p].name)}</option>`).join("")}</select><button class="btn small" data-give="${r.id}">Give</button></div></td></tr>`).join("") || `<tr><td colspan="9" class="empty">No invitations match.</td></tr>`}
     </tbody></table></div>
@@ -62,7 +62,7 @@ function render() {
   $$("[data-f]").forEach((b) => (b.onclick = () => { statusF = b.dataset.f; render(); }));
   $$("[data-give]").forEach((b) => (b.onclick = async () => {
     const plan = $(`[data-plan="${b.dataset.give}"]`).value;
-    try { await api.adminSetPlan(b.dataset.give, plan, true); toast(`${PLANS[plan].name} given and published`); load(); } catch (e) { toast(e.message); }
+    try { await api.adminSetPlan(b.dataset.give, plan, !b.closest("tr").querySelector("[data-req]").dataset.req); toast(`${PLANS[plan].name} given and published`); load(); } catch (e) { toast(e.message); }
   }));
 }
 boot();

@@ -14,7 +14,16 @@ export const CONFIG = {
 
   // false = no Stripe yet. Couples press "Request" and you publish them
   // from admin.html with the Give button. Set to true once Stripe is set up.
-  PAYMENTS: false,
+  PAYMENTS: true,
+
+  // Stripe Payment Links, one per plan. These are TEST links (sandbox):
+  // pay with card 4242 4242 4242 4242, any future date, any CVC.
+  // Swap them for live links once the Stripe account is activated.
+  PAYMENT_LINKS: {
+    essential: "https://buy.stripe.com/test_14AeVe86g8yG3ClcFA2VG01",
+    signature: "https://buy.stripe.com/test_00waEY86gdT02yhgVQ2VG00",
+    atelier:   "https://buy.stripe.com/test_3cI3cw72caGO8WFcFA2VG02",
+  },
 
   BRAND: "Velune Letters",
   CONTACT_EMAIL: "hello@veluneletters.com",

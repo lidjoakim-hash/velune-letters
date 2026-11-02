@@ -198,11 +198,17 @@ export const api = {
   async checkout(invId, plan) {
     if (!LIVE) {
       const db = load(); const i = db.invitations.find((x) => x.id === invId);
-      const prices = { essential: 6900, signature: 14900, atelier: 39000 };
+      const prices = { essential: 6900, signature: 7900, atelier: 39000 };
       const paidBefore = i.paid_at && i.plan ? prices[i.plan] : 0;
       db.payments.push({ id: uuid(), invitation_id: invId, plan, amount: prices[plan] - paidBefore, created_at: now() });
       Object.assign(i, { plan, paid_at: i.paid_at || now(), status: "live" }); persist(db);
       return { demo: true };
+    }
+    const link = CONFIG.PAYMENT_LINKS && CONFIG.PAYMENT_LINKS[plan];
+    if (link) {
+      const c0 = await client(); const { data: u } = await c0.auth.getUser();
+      const email = u && u.user && u.user.email;
+      return { url: `${link}?client_reference_id=${encodeURIComponent(invId)}${email ? "&prefilled_email=" + encodeURIComponent(email) : ""}`, link: true };
     }
     const c = await client();
     const { data, error } = await c.functions.invoke("create-checkout", { body: { invitation_id: invId, plan } });
