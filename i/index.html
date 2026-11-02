@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>You're invited · Velune Letters</title>
+<meta name="description" content="Open your wedding invitation.">
+<meta property="og:title" content="You're invited">
+<meta property="og:description" content="Tap to open your wedding invitation.">
+<meta name="theme-color" content="#EFE9E1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700\&family=Jost:wght@300;400;500;600\&family=Pinyon+Script\&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400\&family=Cinzel:wght@400;600\&family=Italiana\&family=Marcellus\&display=swap">
+<link rel="stylesheet" href="../assets/invite.css">
+</head>
+<body class="guest-page">
+<div id="root"><div class="nf"><div class="spin" aria-label="Loading"></div></div></div>
+<script type="module">
+import { api } from "../assets/api.js";
+import { renderInvite, esc, Music } from "../assets/invite.js";
+import { T } from "../assets/i18n.js";
+
+const q = location.search.slice(1).split("&");
+const slug = decodeURIComponent((q.find((p) => p && !p.includes("=")) || new URLSearchParams(location.search).get("s") || "")).toLowerCase();
+const gcode = new URLSearchParams(location.search).get("g");
+const root = document.getElementById("root");
+const browserLang = (navigator.language || "en").slice(0, 2);
+
+function notFound() {
+  const t = T[browserLang === "ro" ? "ro" : browserLang === "nb" || browserLang === "no" || browserLang === "nn" ? "no" : "en"];
+  root.innerHTML = `<div class="nf"><div><h1>Velune Letters</h1><p style="font-size:1.2rem;margin:0 0 6px">${esc(t.notFound)}</p><p style="color:#8A7B6A;max-width:28em;margin:0 auto">${esc(t.notFoundSub)}</p></div></div>`;
+}
+
+let inv = null;
+try {
+  inv = slug ? await api.publicInvitation(slug, gcode) : null;
+  if (!inv && slug) inv = await api.ownerInvitationBySlug(slug);
+} catch (e) { inv = null; }
+
+if (!inv) notFound();
+else {
+  const data = inv.data;
+  // guests see their own language when the couple offers it
+  const offered = (data.langs && data.langs.length ? data.langs : [data.lang]);
+  const pick = browserLang === "nb" || browserLang === "nn" ? "no" : browserLang;
+  if (inv.plan !== "essential" && offered.includes(pick)) data.lang = pick;
+  document.title = `${data.p1} & ${data.p2} · Velune Letters`;
+  document.documentElement.lang = data.lang === "no" ? "nb" : data.lang;
+  if (inv.draft) {
+    const bar = document.createElement("div"); bar.className = "draft-bar";
+    bar.textContent = "Preview of your draft. Guests can open it after you publish.";
+    document.body.appendChild(bar);
+  }
+  const holder = document.createElement("div"); root.replaceChildren(holder);
+  const opts = {
+    plan: inv.plan, guest: inv.guest, rsvp: inv.rsvp,
+    onRsvp: (p) => api.submitRsvp(inv.slug, gcode, p),
+    onLang: (l) => { data.lang = l; renderInvite(holder, data, Object.assign(opts, { keepOpen: true })); window.scrollTo(0, 0); },
+    onOpen: () => window.scrollTo(0, 0),
+  };
+  renderInvite(holder, data, opts);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) Music.stop(); });
+}
+</script>
+</body>
+</html>
