@@ -206,7 +206,8 @@ function paneDesign() {
       <div class="chips">${LANGS.map((l) => `<label class="switch"><input type="checkbox" data-langs="${l}" ${d.langs.includes(l) ? "checked" : ""} ${ess ? "disabled" : ""}>${esc(T[l].label)}</label>`).join("")}</div>
       <p class="hint">Guests see the language of their phone first when you offer it.</p>${locked("Several languages")}</div>
     <div class="panel"><h2>Music</h2><label class="switch"><input type="checkbox" id="music" ${d.music ? "checked" : ""} ${ess ? "disabled" : ""}>Play a music box melody when the seal breaks</label>${locked("Music")}
-      <label class="switch" style="margin-top:12px"><input type="checkbox" id="petals" ${d.petals ? "checked" : ""}>Let petals fall when the invitation opens</label></div>
+      <label class="switch" style="margin-top:12px"><input type="checkbox" id="petals" ${d.petals ? "checked" : ""}>Let petals fall when the invitation opens</label>
+      <label class="switch" style="margin-top:12px"><input type="checkbox" id="florals" ${d.florals !== false ? "checked" : ""}>Watercolour flowers on the invitation</label></div>
     <div class="panel"><h2>Photos</h2>
       <div class="photos" id="photos">${d.photos.map((p, i) => `<div class="p"><img src="${esc(p)}" alt=""><button data-del="${i}" aria-label="Remove photo">×</button></div>`).join("")}
         ${d.photos.length < 9 ? `<label class="add">+ Add photos<input type="file" accept="image/*" multiple id="addph" ${ess ? "disabled" : ""}></label>` : ""}</div>
@@ -216,6 +217,7 @@ function paneDesign() {
   $$("[data-langs]", pane).forEach((c) => (c.onchange = () => { const l = c.dataset.langs; d.langs = c.checked ? Array.from(new Set([...d.langs, l])) : d.langs.filter((x) => x !== l); if (!d.langs.includes(d.lang)) d.langs.push(d.lang); paneDesign(); change(); }));
   $("#music").onchange = (e) => { d.music = e.target.checked; change(); };
   $("#petals").onchange = (e) => { d.petals = e.target.checked; change(); };
+  $("#florals").onchange = (e) => { d.florals = e.target.checked; change(); };
   $$("[data-del]", pane).forEach((b) => (b.onclick = async () => { const [url] = d.photos.splice(+b.dataset.del, 1); paneDesign(); change(); api.deletePhoto(url).catch(() => {}); }));
   const add = $("#addph");
   if (add) add.onchange = async () => {
