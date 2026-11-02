@@ -189,8 +189,9 @@ export function renderInvite(root, raw, opts = {}) {
     if (musicOn) Music.start();
     if (reduce) { open(); return; }
     root.classList.add("opening");
-    burst(root);
-    setTimeout(() => { root.classList.remove("opening"); open(); }, 2750);
+    bloom(root);
+    setTimeout(() => burst(root), 2300);
+    setTimeout(() => { root.classList.remove("opening"); open(); }, 5300);
   });
   const mus = root.querySelector(".mus"); if (mus) mus.addEventListener("click", () => Music.toggle());
   root.querySelectorAll("[data-ilang]").forEach((b) => b.addEventListener("click", () => opts.onLang && opts.onLang(b.dataset.ilang)));
@@ -203,17 +204,32 @@ export function renderInvite(root, raw, opts = {}) {
   return { open };
 }
 
-/* ---------- seal crack, gold sparks and petal burst ---------- */
+/* ---------- the wax seal melts and blooms into a flower ---------- */
+function bloom(root) {
+  const env = root.querySelector(".env");
+  if (!env) return;
+  const cs = getComputedStyle(root), c = cs.getPropertyValue("--i-seal").trim() || "#9A7C52", a = cs.getPropertyValue("--i-accent").trim() || "#B8924F";
+  const cup = (l, w) => `M0 0C${w} ${-l * .15} ${w * 1.1} ${-l * .85} ${w * .3} ${-l}Q0 ${-l * .88} ${-w * .3} ${-l}C${-w * 1.1} ${-l * .85} ${-w} ${-l * .15} 0 0Z`;
+  let g = "";
+  const ring = (n, l, w, off, d0, step, fill) => { for (let i = 0; i < n; i++) g += `<g class="bp" style="--r:${(i * 360 / n + off).toFixed(1)}deg;--d:${(d0 + i * step).toFixed(2)}s"><path d="${cup(l, w)}" fill="url(#${fill})" stroke="rgba(0,0,0,.18)" stroke-width=".4"/><path d="M0 -4Q${w * .25} ${-l * .5} 0 ${-l * .9}" stroke="rgba(255,255,255,.35)" stroke-width=".8" fill="none"/></g>`; };
+  ring(8, 50, 26, 0, 1.05, .07, "bwA");
+  ring(7, 38, 20, 22, .8, .07, "bwB");
+  ring(6, 26, 14, 8, .55, .07, "bwA");
+  ring(5, 15, 9, 30, .35, .06, "bwB");
+  const svg = `<svg class="bloom" viewBox="-60 -60 120 120" aria-hidden="true"><defs>
+    <radialGradient id="bwA" cx="50%" cy="100%" r="110%"><stop offset="0" style="stop-color:color-mix(in srgb, ${c} 60%, #000)"/><stop offset=".45" style="stop-color:${c}"/><stop offset="1" style="stop-color:color-mix(in srgb, ${c} 55%, #fff)"/></radialGradient>
+    <radialGradient id="bwB" cx="50%" cy="100%" r="110%"><stop offset="0" style="stop-color:color-mix(in srgb, ${c} 75%, #000)"/><stop offset=".6" style="stop-color:color-mix(in srgb, ${c} 85%, ${a})"/><stop offset="1" style="stop-color:color-mix(in srgb, ${c} 40%, #fff)"/></radialGradient>
+    </defs>${g}<circle class="bc" r="6" fill="color-mix(in srgb, ${a} 70%, #fff3c4)"/></svg>`;
+  const wrap = document.createElement("div"); wrap.className = "bloom-wrap"; wrap.innerHTML = svg + `<i class="heat"></i>`;
+  env.appendChild(wrap);
+}
+
+/* ---------- gold sparks and petal burst ---------- */
 function burst(root) {
   const env = root.querySelector(".env"), seal = root.querySelector(".seal");
   if (!env || !seal || !env.animate) return;
   const cs = getComputedStyle(root), sealCol = cs.getPropertyValue("--i-seal").trim() || "#9A7C52", acc = cs.getPropertyValue("--i-accent").trim() || "#B8924F";
   const add = (cls, css) => { const e = document.createElement("i"); e.className = cls; e.style.cssText = css; env.appendChild(e); return e; };
-  // wax halves
-  [["l", -1], ["r", 1]].forEach(([side, dir]) => {
-    const h = add("shard " + side, "");
-    h.animate([{ transform: "translate(0,0) rotate(0)", opacity: 1 }, { transform: `translate(${dir * 46}px,70px) rotate(${dir * 38}deg)`, opacity: 0 }], { duration: 900, easing: "cubic-bezier(.3,.6,.4,1)", fill: "forwards" });
-  });
   // gold sparks
   for (let i = 0; i < 22; i++) {
     const a = (i / 22) * Math.PI * 2 + Math.random() * .3, r = 70 + Math.random() * 90, s = 3 + Math.random() * 4;
