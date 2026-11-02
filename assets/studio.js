@@ -205,7 +205,8 @@ function paneDesign() {
       <p class="hint" style="margin:16px 0 10px">Guests can switch between</p>
       <div class="chips">${LANGS.map((l) => `<label class="switch"><input type="checkbox" data-langs="${l}" ${d.langs.includes(l) ? "checked" : ""} ${ess ? "disabled" : ""}>${esc(T[l].label)}</label>`).join("")}</div>
       <p class="hint">Guests see the language of their phone first when you offer it.</p>${locked("Several languages")}</div>
-    <div class="panel"><h2>Music</h2><label class="switch"><input type="checkbox" id="music" ${d.music ? "checked" : ""} ${ess ? "disabled" : ""}>Play a music box melody when the seal breaks</label>${locked("Music")}</div>
+    <div class="panel"><h2>Music</h2><label class="switch"><input type="checkbox" id="music" ${d.music ? "checked" : ""} ${ess ? "disabled" : ""}>Play a music box melody when the seal breaks</label>${locked("Music")}
+      <label class="switch" style="margin-top:12px"><input type="checkbox" id="petals" ${d.petals ? "checked" : ""}>Let petals fall when the invitation opens</label></div>
     <div class="panel"><h2>Photos</h2>
       <div class="photos" id="photos">${d.photos.map((p, i) => `<div class="p"><img src="${esc(p)}" alt=""><button data-del="${i}" aria-label="Remove photo">×</button></div>`).join("")}
         ${d.photos.length < 9 ? `<label class="add">+ Add photos<input type="file" accept="image/*" multiple id="addph" ${ess ? "disabled" : ""}></label>` : ""}</div>
@@ -214,6 +215,7 @@ function paneDesign() {
   $$("[data-lang]", pane).forEach((b) => (b.onclick = () => { d.lang = b.dataset.lang; if (!d.langs.includes(d.lang)) d.langs.push(d.lang); paneDesign(); change(); }));
   $$("[data-langs]", pane).forEach((c) => (c.onchange = () => { const l = c.dataset.langs; d.langs = c.checked ? Array.from(new Set([...d.langs, l])) : d.langs.filter((x) => x !== l); if (!d.langs.includes(d.lang)) d.langs.push(d.lang); paneDesign(); change(); }));
   $("#music").onchange = (e) => { d.music = e.target.checked; change(); };
+  $("#petals").onchange = (e) => { d.petals = e.target.checked; change(); };
   $$("[data-del]", pane).forEach((b) => (b.onclick = async () => { const [url] = d.photos.splice(+b.dataset.del, 1); paneDesign(); change(); api.deletePhoto(url).catch(() => {}); }));
   const add = $("#addph");
   if (add) add.onchange = async () => {
@@ -238,6 +240,10 @@ function paneDetails() {
       ${field("dress", "Dress code")}${field("rsvpby", "Reply by", "date")}</div></div>
     <div class="panel"><h2>Schedule</h2><div class="sched" id="sched"></div><button class="btn small ghost" id="add-row" style="margin-top:12px">Add a moment</button></div>
     <div class="panel"><h2>Your story</h2><label class="f">A few lines guests will read<textarea id="f-story">${esc(d.story)}</textarea></label></div>
+    <div class="panel"><h2>Gifts</h2>
+      <label class="switch"><input type="checkbox" id="gifts-on" ${d.showGifts ? "checked" : ""}>Show a gifts section</label>
+      <label class="f" style="margin-top:14px">Message (leave empty for our wording in each language)<textarea id="f-giftsText" placeholder="${esc(t.giftsText)}">${esc(d.giftsText)}</textarea></label>
+      <label class="f" style="margin-top:14px">Account number, IBAN or registry link (optional)<input id="f-giftsInfo" value="${esc(d.giftsInfo)}" placeholder="IBAN RO49 AAAA 1B31 0075 9384 0000"></label></div>
     <div class="panel"><h2>Replies</h2>
       <label class="switch"><input type="checkbox" id="meals" ${d.showMeals ? "checked" : ""}>Ask guests to choose dinner (${esc(t.meals.join(", "))})</label>
       <label class="f" style="margin-top:14px;max-width:320px">Most guests one reply can bring (general link)<select id="openParty">${Array.from({ length: 10 }, (_, i) => `<option ${+d.openParty === i + 1 ? "selected" : ""}>${i + 1}</option>`).join("")}</select></label>
@@ -247,6 +253,8 @@ function paneDetails() {
       <p class="hint" id="slug-msg">${inv.paid_at ? "The link is fixed now that guests may have it." : "Letters, numbers and dashes. You can change it until you publish."}</p></div>`;
   ["p1", "p2", "date", "time", "venue", "city", "address", "dress", "rsvpby", "story"].forEach((k) => { const el = $("#f-" + k); el.oninput = () => { d[k] = el.value; change(); }; });
   $("#meals").onchange = (e) => { d.showMeals = e.target.checked; change(); };
+  $("#gifts-on").onchange = (e) => { d.showGifts = e.target.checked; change(); };
+  ["giftsText", "giftsInfo"].forEach((k) => { const el = $("#f-" + k); el.oninput = () => { d[k] = el.value; change(); }; });
   $("#openParty").onchange = (e) => { d.openParty = +e.target.value; change(); };
   const slug = $("#slug");
   slug.onchange = async () => {

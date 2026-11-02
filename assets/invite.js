@@ -6,7 +6,7 @@ import { features } from "./config.js";
 export const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 export const DEFAULT_DATA = {
-  theme: "tuscany", lang: "en", langs: ["en", "ro", "no"], music: true, showMeals: true, openParty: 4,
+  theme: "tuscany", lang: "en", langs: ["en", "ro", "no"], music: true, showMeals: true, openParty: 4, petals: true, showGifts: true, giftsText: "", giftsInfo: "",
   p1: "Elena", p2: "Matteo", date: "2027-06-12", time: "16:00",
   venue: "Villa Aurelia", city: "Lake Como, Italy", address: "Villa Aurelia, Lake Como, Italy",
   dress: "Black tie optional", rsvpby: "2027-04-01",
@@ -155,8 +155,9 @@ export function renderInvite(root, raw, opts = {}) {
       <h3>${esc(t.venue)}</h3>
       <p class="venue-name">${esc(d.venue)}</p><p style="color:var(--i-muted)">${esc(d.city)}</p>
       <a class="ibtn" href="${esc(maps)}" target="_blank" rel="noopener">${esc(t.maps)}</a>
-      ${d.dress ? `<p class="kicker" style="margin-top:26px">${esc(t.dress)}</p><p class="venue-name" style="font-size:1.15rem">${esc(d.dress)}</p>` : ""}
+      ${d.dress ? `<div class="dress"><svg viewBox="0 0 120 64" aria-hidden="true"><path d="M30 14l-9 8 4 4v30h22V26l4-4-9-8-6 6z"/><path d="M33 20l3 4 3-4"/><path d="M36 24v26"/><path d="M84 12c-3 0-5 2-5 5l-2 9-11 30h36L91 26l-2-9c0-3-2-5-5-5z"/><path d="M79 26h10"/></svg><p class="kicker">${esc(t.dress)}</p><p class="venue-name" style="font-size:1.15rem">${esc(d.dress)}</p></div>` : ""}
     </div>
+    ${d.showGifts ? `<div class="orn"><span></span></div><div class="sec gifts"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="12" y="26" width="40" height="28" rx="2"/><rect x="9" y="18" width="46" height="9" rx="2"/><path d="M32 18v36"/><path d="M32 18c-4-8-14-10-14-3 0 4 8 3 14 3zM32 18c4-8 14-10 14-3 0 4-8 3-14 3z"/></svg><h3>${esc(t.gifts)}</h3><p class="story">${esc(d.giftsText || t.giftsText)}</p>${d.giftsInfo ? `<p class="gift-info">${esc(d.giftsInfo)}</p>` : ""}</div>` : ""}
     <div class="orn"><span></span></div>
     <div class="sec rsvp">
       <h3>${esc(t.rsvp)}</h3>
@@ -167,11 +168,13 @@ export function renderInvite(root, raw, opts = {}) {
     ${langBtns}
     <p class="ifoot">${esc(t.made)} <b>Velune Letters</b></p>
   </article>
+  ${d.petals ? `<canvas class="petals" aria-hidden="true"></canvas>` : ""}
   <div class="lightbox" hidden><img alt=""><button type="button" aria-label="Close">×</button></div>`;
 
   const paint = () => root.querySelectorAll("canvas[data-motif]").forEach((c) => draw(c, c.dataset.motif));
   requestAnimationFrame(paint);
-  const open = () => { root.classList.add("opened"); requestAnimationFrame(paint); if (opts.onOpen) opts.onOpen(); };
+  const startPetals = () => { const c = root.querySelector("canvas.petals"); if (c && !reduce) petals(c, root, [v.seal, v.accent]); };
+  const open = () => { root.classList.add("opened"); requestAnimationFrame(paint); startPetals(); if (opts.onOpen) opts.onOpen(); };
   root.querySelector(".seal").addEventListener("click", () => {
     if (root.classList.contains("opening")) return;
     if (musicOn) Music.start();
@@ -186,8 +189,33 @@ export function renderInvite(root, raw, opts = {}) {
   lb.addEventListener("click", () => { lb.hidden = true; });
   rsvpForm(root.querySelector(".rsvp-body"), d, opts, opts.rsvp || null);
   tick();
-  if (root.classList.contains("opened")) requestAnimationFrame(paint);
+  if (root.classList.contains("opened")) { requestAnimationFrame(paint); startPetals(); }
   return { open };
+}
+
+/* ---------- falling petals ---------- */
+function petals(canvas, root, colors) {
+  if (canvas._run) return; canvas._run = true;
+  const ctx = canvas.getContext("2d"), dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let w = 0, h = 0;
+  const size = () => { w = canvas.clientWidth; h = canvas.clientHeight; canvas.width = w * dpr; canvas.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  size();
+  const P = Array.from({ length: 16 }, (_, i) => ({ x: Math.random() * w, y: -Math.random() * h, r: 5 + Math.random() * 6, s: 0.25 + Math.random() * 0.5, a: Math.random() * 6.28, sp: 0.01 + Math.random() * 0.02, c: colors[i % colors.length], life: 0 }));
+  const t0 = performance.now();
+  const step = (now) => {
+    if (!root.isConnected || !canvas.isConnected) return;
+    if (canvas.clientWidth !== w || canvas.clientHeight !== h) size();
+    ctx.clearRect(0, 0, w, h);
+    const fade = Math.max(0, 1 - Math.max(0, now - t0 - 9000) / 3000); // gentle shower for ~10 s
+    for (const p of P) {
+      p.y += p.s * 1.6; p.x += Math.sin(p.a) * 0.6; p.a += p.sp;
+      if (p.y > h + 10) { p.y = -10; p.x = Math.random() * w; }
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.globalAlpha = 0.55 * fade; ctx.fillStyle = p.c;
+      ctx.beginPath(); ctx.ellipse(0, 0, p.r, p.r * 0.55, 0, 0, 6.29); ctx.fill(); ctx.restore();
+    }
+    if (fade > 0) requestAnimationFrame(step); else ctx.clearRect(0, 0, w, h);
+  };
+  requestAnimationFrame(step);
 }
 
 let uid = 0;

@@ -1,7 +1,7 @@
 // Velune Letters · the six designs and their generated artwork
 export const THEMES={
- lace:{name:"Lace",tag:"Ivory and soft gold, for timeless romance",v:{bg:"#EFE9E1",paper:"#FBF8F4",ink:"#3E3328",muted:"#8A7B6A",accent:"#A08660",seal:"#B39566",env:"#E7DED1"},display:'"Cormorant Garamond",Georgia,serif'},
- stained:{name:"Stained Glass",tag:"Jewel tones under a cathedral arch",v:{bg:"#17131C",paper:"#221C29",ink:"#F2E9DA",muted:"#B9AFC2",accent:"#D8B86A",seal:"#7B2D43",env:"#2E2536"},display:'"Cinzel",Georgia,serif'},
+ lace:{name:"Chantilly",tag:"Ivory lacework and soft gold, for timeless romance",v:{bg:"#EFE9E1",paper:"#FBF8F4",ink:"#3E3328",muted:"#8A7B6A",accent:"#A08660",seal:"#B39566",env:"#E7DED1"},display:'"Cormorant Garamond",Georgia,serif'},
+ stained:{name:"Cathedral",tag:"A jewel-tone mosaic under a gothic arch",v:{bg:"#17131C",paper:"#221C29",ink:"#F2E9DA",muted:"#B9AFC2",accent:"#D8B86A",seal:"#7B2D43",env:"#2E2536"},display:'"Cinzel",Georgia,serif'},
  tuscany:{name:"Tuscany",tag:"Olive hills and cypress for Italian villas",v:{bg:"#EADBC6",paper:"#FAF3EA",ink:"#3F3A26",muted:"#7F7558",accent:"#B5652F",seal:"#9C4E25",env:"#E4D3BB"},display:'"Italiana",Georgia,serif'},
  midnight:{name:"Midnight",tag:"Gold stars for an evening ceremony",v:{bg:"#0B1028",paper:"#121A3A",ink:"#EEE8D6",muted:"#A9B0C8",accent:"#D9B76A",seal:"#C49A45",env:"#1C2550"},display:'"Bodoni Moda",Georgia,serif'},
  fjord:{name:"Fjord",tag:"Slate mountains and still water, made in Norway",v:{bg:"#DCE4E9",paper:"#F7F9FA",ink:"#22323E",muted:"#61727F",accent:"#3E6A86",seal:"#2F5068",env:"#CFDAE1"},display:'"Marcellus",Georgia,serif'},

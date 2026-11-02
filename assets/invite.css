@@ -91,3 +91,12 @@
 .nf h1{font-family:"Pinyon Script",cursive;font-weight:400;font-size:3rem;margin:0 0 6px;color:#A08660}
 .nf .spin{width:34px;height:34px;border-radius:50%;border:2px solid #d8cbb8;border-top-color:#A08660;animation:spin 1s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* luxury details */
+.sheet{position:relative}
+.sheet::after{content:"";position:absolute;inset:10px;border:1px solid color-mix(in srgb,var(--i-accent) 38%,transparent);box-shadow:inset 0 0 0 4px var(--i-paper),inset 0 0 0 5px color-mix(in srgb,var(--i-accent) 22%,transparent);pointer-events:none;border-radius:2px}
+.dress{margin-top:26px}
+.dress svg,.gifts svg{width:84px;height:46px;fill:none;stroke:var(--i-accent);stroke-width:1.4;stroke-linejoin:round;stroke-linecap:round;display:block;margin:0 auto 8px}
+.gifts svg{width:46px;height:46px}
+.gift-info{margin-top:12px;font-variant-numeric:tabular-nums;letter-spacing:.06em;color:var(--i-ink);font-size:.95rem}
+.inv canvas.petals{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}
+.full-invite .inv canvas.petals,.guest-page .inv canvas.petals{position:fixed}
