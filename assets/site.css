@@ -34,7 +34,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .btn.ghost{border-color:var(--line)}
 
 /* header */
-.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 96%,transparent);border-bottom:1px solid var(--line)}
 .bar .wrap{display:flex;align-items:center;gap:20px;height:64px}
 .logo{display:flex;align-items:baseline;gap:.4em;text-decoration:none;color:var(--fg);cursor:pointer;background:none;border:0;padding:0}
 .logo b{font-family:var(--f-display);font-weight:500;font-size:1.35rem;letter-spacing:.02em}
@@ -267,11 +267,13 @@ a.thumb{color:inherit;text-decoration:none}
 .hero .fl-tl{top:-60px;left:-60px}
 .hero .fl-br{bottom:-40px;right:-30px}
 .hero-phone .fl-halo{position:absolute;z-index:-1;width:120%;left:-10%;top:-6%;opacity:.9;pointer-events:none;line-height:0}
-.hero-phone .fl-halo svg{width:100%;height:auto}
+.hero-phone .fl-halo img{width:100%;height:auto;display:block}
 .head .fl-div{display:block;width:180px;height:auto;margin:6px 0 10px -6px}
 .thumb .fl-c{width:52%;z-index:2}
 .thumb .fl-c+.fl-c{width:40%}
+.thumb .art-wreath img{width:100%;height:auto;display:block}
 .thumb .art-wreath{position:absolute;left:50%;top:29%;width:58%;transform:translate(-50%,-50%);z-index:1}
+.thumb .art-meadow img{width:100%;height:100%;display:block}
 .thumb .art-meadow{position:absolute;left:0;right:0;top:30%;height:28%;z-index:1}
 .price{position:relative;overflow:hidden}
 .price>*{position:relative;z-index:1}

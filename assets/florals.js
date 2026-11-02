@@ -25,7 +25,7 @@ const leafPath = (l, w) => `M0 0C${f(w)} ${f(-l * .28)} ${f(w * .7)} ${f(-l * .7
 
 function defs(u, P) {
   return `<defs>
-  <filter id="wc${u}" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="${u % 9 + 2}"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter>
+  <filter id="wc${u}" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="1" seed="${u % 9 + 2}"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter>
   <radialGradient id="pa${u}" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="${P.p3}"/><stop offset=".45" stop-color="${P.p2}"/><stop offset="1" stop-color="${P.p1}"/></radialGradient>
   <radialGradient id="pb${u}" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="${P.p2}"/><stop offset=".6" stop-color="${P.p1}"/><stop offset="1" stop-color="${P.p1}" stop-opacity=".7"/></radialGradient>
   <linearGradient id="lf${u}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${P.l2}"/><stop offset="1" stop-color="${P.l1}"/></linearGradient>
@@ -93,9 +93,9 @@ const berries = (P, pts) => pts.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" 
 
 /* ---------- compositions ---------- */
 // Corner bouquet, drawn for the top-left corner (mirror with CSS for others)
-export function bouquet(id, opts = {}) {
+function _bouquet(id, opts = {}) {
   const P = flora(id), u = ++UID, big = opts.big !== false;
-  let s = `<svg class="fl-bq" viewBox="0 0 300 300" aria-hidden="true">${defs(u, P)}<g transform="translate(-14 -14)">`;
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" class="fl-bq" viewBox="0 0 300 300" aria-hidden="true">${defs(u, P)}<g transform="translate(-14 -14)">`;
   // leafy backing tucked behind the blooms
   for (const [a, l] of [[-10, 70], [18, 84], [40, 64], [62, 90], [84, 70], [108, 86], [128, 66], [150, 80], [172, 60]]) s += leaf(u, 72, 72, l + 30, (l + 30) * .34, a, .9);
   s += eucalyptus(u, 40, 46, 250, 78, 9) + eucalyptus(u, 46, 40, 230, 168, 8) + eucalyptus(u, 60, 60, 200, 128, 7);
@@ -111,9 +111,9 @@ export function bouquet(id, opts = {}) {
 }
 
 // Horizontal botanical divider
-export function divider(id) {
+function _divider(id) {
   const P = flora(id), u = ++UID;
-  let s = `<svg class="fl-div" viewBox="0 0 260 44" aria-hidden="true">${defs(u, P)}`;
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" class="fl-div" viewBox="0 0 260 44" aria-hidden="true">${defs(u, P)}`;
   s += sprig(u, 112, 24, 96, -90, 4, .62) + sprig(u, 148, 24, 96, 90, 4, .62);
   s += blossom(u, 108, 18, 5, P.p1, P.b) + blossom(u, 152, 30, 5, P.p1, P.b);
   s += rose(u, 130, 22, 13, 10);
@@ -121,9 +121,9 @@ export function divider(id) {
 }
 
 // Round wreath with an open centre (for monograms)
-export function wreath(id, text = "") {
+function _wreath(id, text = "") {
   const P = flora(id), u = ++UID, cx = 150, cy = 150, R = 104;
-  let s = `<svg class="fl-wr" viewBox="0 0 300 300" aria-hidden="true">${defs(u, P)}`;
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" class="fl-wr" viewBox="0 0 300 300" aria-hidden="true">${defs(u, P)}`;
   s += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="url(#lf${u})" stroke-width="1.2" opacity=".7"/>`;
   for (let i = 0; i < 30; i++) {
     const a = i / 30 * Math.PI * 2, x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R, deg = a * 180 / Math.PI;
@@ -139,10 +139,10 @@ export function wreath(id, text = "") {
 }
 
 // Wildflower meadow strip
-export function meadow(id) {
+function _meadow(id) {
   const P = flora(id), u = ++UID;
   const cols = [[P.p2, P.b], ["#FFFFFF", P.b], [P.p3, "#8E5A3C"], [P.b, "#9C6B2B"], ["#F3D7E6", P.b]];
-  let s = `<svg class="fl-md" viewBox="0 0 400 130" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${defs(u, P)}`;
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" class="fl-md" viewBox="0 0 400 130" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${defs(u, P)}`;
   let seed = 11; const r = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
   for (let i = 0; i < 70; i++) { const x = r() * 400, h = 30 + r() * 70, b = (r() - .5) * 30; s += `<path d="M${f(x)} 130Q${f(x + b * .4)} ${f(130 - h * .6)} ${f(x + b)} ${f(130 - h)}" stroke="url(#lf${u})" stroke-width="${f(.8 + r())}" fill="none" opacity=".8"/>`; }
   for (let i = 0; i < 12; i++) s += sprig(u, 20 + r() * 360, 130, 40 + r() * 40, (r() - .5) * 40, 3, .55);
@@ -152,12 +152,33 @@ export function meadow(id) {
 }
 
 // Small sprig tucked beside the wax seal
-export function sealSprig(id) {
+function _sealSprig(id) {
   const P = flora(id), u = ++UID;
-  let s = `<svg class="fl-sp" viewBox="0 0 160 120" aria-hidden="true">${defs(u, P)}`;
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" class="fl-sp" viewBox="0 0 160 120" aria-hidden="true">${defs(u, P)}`;
   s += eucalyptus(u, 80, 70, 70, -70, 5) + eucalyptus(u, 80, 70, 70, 70, 5);
   s += sprig(u, 80, 66, 56, -110, 3, .6) + sprig(u, 80, 66, 56, 110, 3, .6);
   s += bud(u, 30, 52, 7, -80) + bud(u, 130, 52, 7, 80);
   s += rose(u, 44, 66, 15, 0) + rose(u, 116, 66, 15, 30);
   return s + `</svg>`;
 }
+
+/* ---------- rasterised output ----------
+   Each artwork is returned as an <img> (SVG data URI). The browser paints it
+   once as a bitmap, so the watercolour filters never re-run while scrolling. */
+const CACHE = new Map();
+function asImg(key, make) {
+  let html = CACHE.get(key);
+  if (!html) {
+    const svg = make(), cls = (svg.match(/class="([^"]+)"/) || [])[1] || "";
+    UID = 0;
+    html = `<img class="${cls}" alt="" aria-hidden="true" decoding="async" draggable="false" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}">`;
+    CACHE.set(key, html);
+  }
+  return html;
+}
+export const bouquet = (id, opts = {}) => asImg(`b:${id}:${opts.big !== false}`, () => _bouquet(id, opts));
+export const divider = (id) => asImg(`d:${id}`, () => _divider(id));
+export const meadow = (id) => asImg(`m:${id}`, () => _meadow(id));
+export const sealSprig = (id) => asImg(`s:${id}`, () => _sealSprig(id));
+// the monogram is HTML on top of the image so it uses the real script font
+export const wreath = (id, text = "") => asImg(`w:${id}`, () => _wreath(id, "")) + (text ? `<span class="wr-t" style="color:${flora(id).gold}">${text}</span>` : "");

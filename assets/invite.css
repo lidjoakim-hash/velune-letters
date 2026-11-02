@@ -68,7 +68,7 @@
 .rsvp .err{color:#B3202A;font-size:.82rem}
 .ifoot{padding:26px;text-align:center;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--i-muted)}
 .ifoot b{font-family:"Pinyon Script",cursive;font-size:1.2rem;letter-spacing:0;text-transform:none;font-weight:400;color:var(--i-accent)}
-.mus{position:sticky;top:12px;float:right;margin:12px 12px -52px 0;z-index:6;width:40px;height:40px;border-radius:50%;border:1px solid color-mix(in srgb,var(--i-ink) 25%,transparent);background:color-mix(in srgb,var(--i-paper) 80%,transparent);backdrop-filter:blur(6px);cursor:pointer;color:var(--i-ink);display:grid;place-items:center}
+.mus{position:sticky;top:12px;float:right;margin:12px 12px -52px 0;z-index:6;width:40px;height:40px;border-radius:50%;border:1px solid color-mix(in srgb,var(--i-ink) 25%,transparent);background:color-mix(in srgb,var(--i-paper) 92%,transparent);cursor:pointer;color:var(--i-ink);display:grid;place-items:center}
 .mus svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6}
 .mus[aria-pressed="false"] .wave{display:none}
 .cal{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}
@@ -98,30 +98,32 @@
 .dress svg,.gifts svg{width:84px;height:46px;fill:none;stroke:var(--i-accent);stroke-width:1.4;stroke-linejoin:round;stroke-linecap:round;display:block;margin:0 auto 8px}
 .gifts svg{width:46px;height:46px}
 .gift-info{margin-top:12px;font-variant-numeric:tabular-nums;letter-spacing:.06em;color:var(--i-ink);font-size:.95rem}
-.inv canvas.petals{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}
-.full-invite .inv canvas.petals,.guest-page .inv canvas.petals{position:fixed}
+.inv canvas.petals{position:absolute;left:0;top:0;width:100%;height:100vh;max-height:900px;pointer-events:none;z-index:4}
+.full-invite .inv canvas.petals,.guest-page .inv canvas.petals{position:fixed;inset:0;height:100%;max-height:none}
 /* watercolour florals */
 .inv .stage{position:relative}
 .inv .stage>*{position:relative;z-index:1}
 .inv .stage>.fl-c{position:absolute;z-index:0}
 .fl-c{position:absolute;width:46%;max-width:250px;pointer-events:none;z-index:3;line-height:0}
 .fl-c+.fl-c{width:36%;max-width:190px}
-.fl-c svg{width:100%;height:auto;display:block;overflow:visible}
+.fl-c img{width:100%;height:auto;display:block}
 .fl-tl{top:0;left:0}
 .fl-tr{top:0;right:0;transform:scaleX(-1)}
 .fl-bl{bottom:0;left:0;transform:scaleY(-1)}
 .fl-br{bottom:0;right:0;transform:scale(-1,-1)}
 .art-wrap{position:relative}
 .art-wreath{position:absolute;left:50%;top:50%;width:min(240px,64%);transform:translate(-50%,-48%);line-height:0}
-.art-wreath svg,.art-meadow svg{width:100%;height:100%;display:block}
+.art-wreath img,.art-meadow img{width:100%;height:100%;display:block}
+.art-wreath .wr-t{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-family:"Pinyon Script",cursive;font-size:clamp(2rem,10vw,3rem);line-height:1}
+.fl-c,.art-wreath,.art-meadow,.orn.fl,.fl-seal{contain:layout paint}
 .art-meadow{position:absolute;left:0;right:0;bottom:0;height:48%;line-height:0}
 .orn.fl{padding:2px 20px;gap:0}
 .orn.fl::before,.orn.fl::after{display:none}
-.orn.fl svg{width:min(260px,82%);height:auto;display:block}
+.orn.fl img{width:min(260px,82%);height:auto;display:block}
 .fl-end{position:relative;height:150px;margin:-10px 0 -96px;pointer-events:none}
 .fl-end .fl-c,.fl-end .fl-c+.fl-c{width:36%;max-width:200px}
 .ifoot{position:relative;z-index:4;padding-bottom:34px}
 .env .fl-seal{left:50%;top:52%;width:62%;max-width:180px;transform:translate(-50%,-48%);z-index:5;pointer-events:none;line-height:0;transition:opacity .3s}
-.env .fl-seal svg{width:100%;height:auto;display:block}
+.env .fl-seal img{width:100%;height:auto;display:block}
 .env .seal{z-index:6}
 .inv.opening .fl-seal{opacity:0}
