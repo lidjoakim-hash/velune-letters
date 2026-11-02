@@ -304,7 +304,7 @@
 }
 /* ---------- full-screen paper letter ---------- */
 .vint .stage{background:var(--i-bg) var(--tex) 0 0/360px;background-blend-mode:multiply}
-.vint .env-letter{background:#fffdf8 var(--tex) 0 0/220px;background-blend-mode:multiply}
+.vint .env-letter{background:var(--i-paper)}
 .vint.opening .env-letter{animation:vletter 2.6s cubic-bezier(.55,0,.15,1) 3s both}
 @keyframes vletter{0%{transform:translateY(0)}32%{transform:translateY(-64%)}46%{transform:translateY(-64%) scale(1.03);z-index:2}48%{z-index:9}100%{z-index:9;transform:translateY(-5%) scale(9);box-shadow:none;border-radius:0}}
 .vint.opening .stage{animation:fadeout .5s ease 5.3s both}
@@ -315,3 +315,5 @@
 .vint.opening .env-letter{color:transparent;transition:color .4s ease 3.4s}
 .rsvp .vcard{padding-top:98px}
 .vvenue .venue-name{display:none}
+.vint.opening .stage::after{content:"";position:fixed;inset:0;z-index:20;pointer-events:none;background:var(--i-paper) var(--tex) 0 0/360px;background-blend-mode:multiply;opacity:0;animation:vpaper .7s ease 4.55s forwards}
+@keyframes vpaper{to{opacity:1}}
