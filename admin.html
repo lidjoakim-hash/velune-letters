@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Admin · Velune Letters</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700\&family=Jost:wght@300;400;500;600\&family=Pinyon+Script\&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400\&family=Cinzel:wght@400;600\&family=Italiana\&family=Marcellus\&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/invite.css">
+
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <a class="logo" href="./" aria-label="Velune Letters home"><b>Velune</b><i>Letters</i></a>
+    <nav class="nav" aria-label="Studio">
+      <a class="navlink" id="nav-list" href="studio.html" hidden>My invitations</a>
+      <a class="navlink" id="nav-admin" href="admin.html" hidden>Admin</a>
+      <a class="navlink" id="nav-studio" href="studio.html" hidden>Studio</a>
+      <button class="navlink" id="nav-out" style="border:0;background:none;cursor:pointer" hidden>Log out</button>
+    </nav>
+  </div>
+</header>
+<div class="demo-banner" id="demo-banner" hidden><div class="wrap"><b>Demo mode</b> Everything is saved only in this browser and payments are simulated. Add your Supabase keys in assets/config.js to go live.</div></div>
+<main id="app"></main>
+<div class="modal" id="modal" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="assets/admin.js"></script>
+</body>
+</html>
