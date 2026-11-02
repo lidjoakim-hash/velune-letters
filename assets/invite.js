@@ -2,6 +2,7 @@
 import { T, fmtDate, LANGS } from "./i18n.js";
 import { THEMES, draw } from "./themes.js";
 import { bouquet, divider, wreath, meadow, sealSprig, linerURL } from "./florals.js";
+import { laceEdgeURL, laceOval, laceHeart, baroqueFrame, flourish, icon, manor } from "./vintage.js";
 import { features } from "./config.js";
 
 export const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -103,7 +104,7 @@ export function renderInvite(root, raw, opts = {}) {
   const t = T[d.lang], th = THEMES[d.theme], v = th.v;
   const wasOpen = root.classList.contains("opened");
   root.className = "inv" + (opts.keepOpen && wasOpen ? " opened" : "");
-  root.style.cssText = `--i-liner:${linerURL(d.theme)};--i-bg:${v.bg};--i-paper:${v.paper};--i-ink:${v.ink};--i-muted:${v.muted};--i-accent:${v.accent};--i-seal:${v.seal};--i-env:${v.env};--i-display:${th.display}`;
+  root.style.cssText = `${th.vintage ? `--i-band:${v.band};--i-band-ink:${v.bandInk};--i-lace:${v.lace};` : ""}--i-liner:${linerURL(d.theme)};--i-bg:${v.bg};--i-paper:${v.paper};--i-ink:${v.ink};--i-muted:${v.muted};--i-accent:${v.accent};--i-seal:${v.seal};--i-env:${v.env};--i-display:${th.display}`;
   const maps = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(d.address || d.venue + " " + d.city);
   const sched = d.schedule.filter((s) => s.t || s.x || s.k).map((s) => `<li><time>${esc(s.t)}</time><span>${esc(s.x || t[s.k] || "")}</span></li>`).join("");
   const langs = f.multiLang ? d.langs.filter((l) => T[l]) : [];
@@ -133,6 +134,7 @@ export function renderInvite(root, raw, opts = {}) {
     <p class="names">${esc(d.p1)} &amp; ${esc(d.p2)}</p>
     <p class="tap">${esc(t.tap)}</p>
   </div>
+  ${th.vintage ? vintageSheet({ d, t, th, v, g, maps, musicOn, langBtns, photos }) : `
   <article class="sheet">
     ${musicOn ? `<button class="mus" type="button" aria-pressed="${Music.on}" aria-label="${esc(t.music)}"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wave" d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12"/></svg></button>` : ""}
     <div class="art-wrap"><canvas class="art" data-motif="${d.theme}"></canvas>${th.wreath ? `<div class="art-wreath">${wreath(id, esc(initials(d)))}</div>` : ""}${th.meadow ? `<div class="art-meadow">${meadow(id)}</div>` : ""}${corners("fl-tl", "fl-tr")}</div>
@@ -177,6 +179,7 @@ export function renderInvite(root, raw, opts = {}) {
     ${fl ? `<div class="fl-end">${corners("fl-bl", "fl-br")}</div>` : ""}
     <p class="ifoot">${esc(t.made)} <b>Velune Letters</b></p>
   </article>
+  `}
   ${d.petals ? `<canvas class="petals" aria-hidden="true"></canvas>` : ""}
   <div class="lightbox" hidden><img alt=""><button type="button" aria-label="Close">×</button></div>`;
 
@@ -202,6 +205,81 @@ export function renderInvite(root, raw, opts = {}) {
   tick();
   if (root.classList.contains("opened")) { requestAnimationFrame(paint); startPetals(); }
   return { open };
+}
+
+/* ---------- vintage layout: lace, cartouche, calendar, icon timeline ---------- */
+function calendarHTML(d, lang) {
+  const dt = new Date(d.date + "T12:00:00"); if (isNaN(dt)) return "";
+  const y = dt.getFullYear(), m = dt.getMonth(), day = dt.getDate();
+  const loc = (T[lang] && T[lang].loc) || "en-GB";
+  const month = dt.toLocaleDateString(loc, { month: "long" });
+  const wd = [...Array(7)].map((_, i) => new Date(2024, 0, 1 + i).toLocaleDateString(loc, { weekday: "short" }).slice(0, 2));
+  const first = (new Date(y, m, 1).getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate();
+  let cells = "";
+  for (let i = 0; i < first; i++) cells += "<span></span>";
+  for (let i = 1; i <= days; i++) cells += i === day ? `<span class="on"><svg viewBox="0 0 32 30"><path d="M16 28C6 20 1 14 1 8.5 1 4.4 4.3 1 8.3 1c3 0 5.6 1.7 7.7 4.6C18.1 2.7 20.7 1 23.7 1 27.7 1 31 4.4 31 8.5 31 14 26 20 16 28z"/></svg><b>${i}</b></span>` : `<span>${i}</span>`;
+  return `<div class="vcal"><h3 class="vscript">${esc(month.charAt(0).toUpperCase() + month.slice(1))}</h3><div class="vcal-g">${wd.map((w) => `<i>${esc(w)}</i>`).join("")}${cells}</div></div>`;
+}
+function vintageSheet({ d, t, th, v, g, maps, musicOn, langBtns, photos }) {
+  const ik = { arrive: "welcome", ceremony: "ceremony", dinner: "dinner", party: "dance", cake: "cake", car: "car" };
+  const order = ["welcome", "ceremony", "dinner", "cake", "dance", "car"];
+  const items = d.schedule.filter((s) => s.t || s.x || s.k);
+  const edgePaper = laceEdgeURL(v.lace), edgeBand = laceEdgeURL(v.lace);
+  const lace = (cls) => `<div class="vlace ${cls}" style='background-image:${edgePaper}'></div>`;
+  const photo = photos[0];
+  const sw = (th.swatches || []).map((c) => `<i style="background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.45),transparent 45%),linear-gradient(135deg,${c},color-mix(in srgb,${c} 70%,#000))"></i>`).join("");
+  return `<article class="sheet vsheet">
+    ${musicOn ? `<button class="mus" type="button" aria-pressed="${Music.on}" aria-label="${esc(t.music)}"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wave" d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12"/></svg></button>` : ""}
+    <header class="vhero">
+      <canvas class="art" data-motif="${d.theme}"></canvas>
+      ${d.florals !== false && th.name === "Heirloom Lace" ? `<div class="fl-c fl-tl">${bouquet(d.theme)}</div><div class="fl-c fl-tr">${bouquet(d.theme, { big: false })}</div>` : ""}
+      <div class="vcart">${laceOval(v.lace, v.paper)}<div class="vcart-in">
+        ${photo ? `<div class="vphoto"><img src="${esc(photo)}" alt=""></div>` : `<p class="vkick">${esc(t.together)}</p>`}
+        <h2 class="vnames">${esc(d.p1)}<span>&amp;</span>${esc(d.p2)}</h2>
+        <p class="vdate">${esc(fmtDate(d.date, d.lang, false))}</p>
+      </div></div>
+    </header>
+    ${lace("down")}
+    <section class="vsec">
+      ${g ? `<p class="kicker">${esc(t.dear.replace("{n}", g.name))}</p>` : ""}
+      ${flourish(v.accent)}
+      <p class="vlead">${esc(t.invite)}</p>
+      ${d.story ? `<p class="story">${esc(d.story)}</p>` : ""}
+      ${calendarHTML(d, d.lang)}
+      <p class="place">${esc(d.time)} · ${esc(d.venue)}</p>
+    </section>
+    ${items.length ? `${lace("up band-top")}<section class="vsec vband"><div class="vframe">${baroqueFrame(v.accent, v.paper)}<div class="vframe-in">
+      <h3 class="vscript">${esc(t.schedule)}</h3>
+      <ul class="vtl">${items.map((s, i) => `<li>${icon(ik[s.k] || order[i % order.length], v.ink)}<div><time>${esc(s.t)}</time><span>${esc(s.x || t[s.k] || "")}</span></div></li>`).join("")}</ul>
+    </div></div></section>${lace("down band-bot")}` : ""}
+    <section class="vsec">
+      <h3 class="vscript">${esc(t.venue)}</h3>
+      ${manor(v.ink)}
+      <p class="venue-name">${esc(d.venue)}</p><p class="vmuted">${esc(d.city)}</p>
+      <a class="ibtn fill" href="${esc(maps)}" target="_blank" rel="noopener">${esc(t.maps)}</a>
+    </section>
+    ${d.dress ? `<section class="vsec">${flourish(v.accent)}<h3 class="vscript">${esc(t.dress)}</h3><p class="vlead">${esc(d.dress)}</p><div class="vsw">${sw}</div></section>` : ""}
+    ${d.showGifts ? `<section class="vsec"><div class="vnote"><h3 class="vscript">${esc(t.gifts)}</h3><p class="story">${esc(d.giftsText || t.giftsText)}</p>${d.giftsInfo ? `<p class="gift-info">${esc(d.giftsInfo)}</p>` : ""}</div></section>` : ""}
+    ${lace("up band-top")}
+    <section class="vsec vband vcount">
+      <div class="vheart">${laceHeart(v.lace, v.band)}<div class="vheart-in">
+        <p class="vkick">${esc(t.count)}</p>
+        <div class="cd" data-cd="${esc(target(d).toISOString())}">
+          <div><b data-u="d">0</b><small>${esc(t.days)}</small></div><div><b data-u="h">00</b><small>${esc(t.hours)}</small></div><div><b data-u="m">00</b><small>${esc(t.minutes)}</small></div><div><b data-u="s">00</b><small>${esc(t.seconds)}</small></div>
+        </div>
+      </div></div>
+      <div class="cal"><a class="ibtn" href="${esc(googleCal(d))}" target="_blank" rel="noopener">${esc(t.google)}</a><a class="ibtn" href="${esc(icsHref(d))}" download="wedding.ics">${esc(t.ics)}</a></div>
+    </section>
+    ${lace("down band-bot")}
+    <section class="vsec rsvp">
+      <h3 class="vscript">${esc(t.rsvp)}</h3>
+      ${d.rsvpby ? `<p class="kicker">${esc(t.replyBy)} ${esc(fmtDate(d.rsvpby, d.lang, false))}</p>` : ""}
+      ${g ? `<p class="line" style="margin-top:8px">${esc(g.party > 1 ? t.seats.replace("{p}", g.party) : t.seat1)}</p>` : ""}
+      <div class="rsvp-body"></div>
+    </section>
+    ${langBtns}
+    <footer class="vend">${flourish(v.accent)}<p class="vnames small">${esc(d.p1)}<span>&amp;</span>${esc(d.p2)}</p><p class="ifoot">${esc(t.made)} <b>Velune Letters</b></p></footer>
+  </article>`;
 }
 
 /* ---------- the wax seal melts and blooms into a flower ---------- */
