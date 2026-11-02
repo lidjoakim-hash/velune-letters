@@ -7,6 +7,10 @@ export const THEMES={
  fjord:{name:"Fjord",tag:"Slate mountains and still water, made in Norway",v:{bg:"#DCE4E9",paper:"#F7F9FA",ink:"#22323E",muted:"#61727F",accent:"#3E6A86",seal:"#2F5068",env:"#CFDAE1"},display:'"Marcellus",Georgia,serif'},
  peony:{name:"Blush Peony",tag:"Watercolour peonies and a monogram wreath",v:{bg:"#F4E6E2",paper:"#FFFBF9",ink:"#4A3434",muted:"#9A7F7C",accent:"#C08A7E",seal:"#C9858A",env:"#F0DDD8"},display:'"Cormorant Garamond",Georgia,serif',wreath:true},
  meadow:{name:"Wildflower",tag:"A summer meadow of hand-painted blooms",v:{bg:"#EEF0E2",paper:"#FFFEF8",ink:"#3A3F2C",muted:"#7F846A",accent:"#8E9A5E",seal:"#B4925A",env:"#E6E8D6"},display:'"Italiana",Georgia,serif',meadow:true},
+ heirloom:{name:"Heirloom Lace",tag:"Sage lace, a painted garden and a lace cartouche",vintage:true,v:{bg:"#E7E4D3",paper:"#F8F4E9",ink:"#3F4A2E",muted:"#7A8265",accent:"#6B774A",seal:"#6B774A",env:"#EEE9D9",band:"#5D6A42",bandInk:"#F6F2E5",lace:"#FBF8F0"},swatches:["#F4EFE2","#D9D2BC","#A9B08A","#6B774A","#3F4A2E","#C7A98A"],display:'"Cormorant Garamond",Georgia,serif'},
+ mocha:{name:"Mocha & Pearl",tag:"Chocolate satin, cream lace and an antique frame",vintage:true,v:{bg:"#2F241D",paper:"#F3EADD",ink:"#3B2A20",muted:"#8A7462",accent:"#A0835A",seal:"#5B4131",env:"#EADFCF",band:"#4A3628",bandInk:"#F4EBDD",lace:"#F2E8D8"},swatches:["#1E1712","#4A3628","#7A5C45","#B59A7C","#DCCBB4","#F3EADD"],display:'"Cormorant Garamond",Georgia,serif'},
+ bordeaux:{name:"Bordeaux",tag:"Deep wine, ivory and candlelit romance",vintage:true,v:{bg:"#1F1515",paper:"#F2EDE0",ink:"#4D171B",muted:"#8E6C63",accent:"#7B1F26",seal:"#6E1A20",env:"#EDE6D6",band:"#6B1A20",bandInk:"#F6EFE2",lace:"#F6EFE2"},swatches:["#4D171B","#7B1F26","#B85C5C","#E9D9C8","#C9C4BC","#2A2424"],display:'"Bodoni Moda",Georgia,serif'},
+ linen:{name:"Linen Postcard",tag:"Greige linen, postcards and quiet elegance",vintage:true,v:{bg:"#CEC7BB",paper:"#EAE5DB",ink:"#3D3732",muted:"#857B71",accent:"#8A7D6E",seal:"#5B524A",env:"#E2DCD0",band:"#4B443E",bandInk:"#EFEAE1",lace:"#F5F1E9"},swatches:["#2E2925","#5B4A3D","#8A6E57","#B9A68F","#7E8A6A","#E6DFD3"],display:'"Cormorant Garamond",Georgia,serif'},
  carpathian:{name:"Carpathian",tag:"Romanian cross-stitch in red and black",v:{bg:"#EDEAE3",paper:"#FFFFFF",ink:"#1A1A1A",muted:"#6B6560",accent:"#B3202A",seal:"#B3202A",env:"#E9E4DA"},display:'"Cinzel",Georgia,serif'}
 };
 
@@ -21,7 +25,31 @@ export function draw(c,id){
   ART[id](x,w,h,v,r);
 }
 const wash=(x,w,h,r,cols)=>{for(let i=0;i<14;i++){const cx=r()*w,cy=r()*h*.9,R=40+r()*110,g=x.createRadialGradient(cx,cy,0,cx,cy,R);g.addColorStop(0,cols[i%cols.length]);g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(0,0,w,h)}};
-const ART={
+const ART_V={
+ heirloom(x,w,h,v,r){
+  const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,"#C9D6DC");g.addColorStop(.55,"#E8E6D2");g.addColorStop(1,"#C8CDA6");x.fillStyle=g;x.fillRect(0,0,w,h);
+  for(let i=0;i<9;i++){const cx=r()*w,cy=h*.18+r()*h*.2,R=30+r()*60;const c=x.createRadialGradient(cx,cy,0,cx,cy,R);c.addColorStop(0,"rgba(255,255,255,.55)");c.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=c;x.fillRect(0,0,w,h)}
+  const tree=(tx,ty,s,col)=>{for(let i=0;i<26;i++){x.beginPath();x.arc(tx+(r()-.5)*s*1.4,ty+(r()-.5)*s,s*(.25+r()*.3),0,7);x.fillStyle=col;x.globalAlpha=.35+r()*.3;x.fill()}x.globalAlpha=1};
+  tree(w*.12,h*.42,w*.18,"#6F7F52");tree(w*.9,h*.38,w*.2,"#5E6E45");tree(w*.5,h*.5,w*.1,"#8A9668");
+  x.fillStyle="#9EA87A";x.fillRect(0,h*.6,w,h*.4);
+  const pal=["#F3C9C8","#FFFFFF","#F1D7A9","#C9B7DA","#E9A6A8","#FFF4E0"];
+  for(let i=0;i<420;i++){const px=r()*w,py=h*.62+Math.pow(r(),.7)*h*.38,s=2+r()*5*(py/h);x.beginPath();x.arc(px,py,s,0,7);x.fillStyle=r()<.35?"#7C8C5A":pal[Math.floor(r()*pal.length)];x.globalAlpha=.75;x.fill()}x.globalAlpha=1;
+ },
+ mocha(x,w,h,v,r){
+  for(let i=0;i<w;i+=2){const t=i/w,fold=Math.sin(t*Math.PI*7+Math.sin(t*9)*1.4);const l=40+fold*14+Math.sin(t*31)*4;x.fillStyle=`hsl(25,32%,${Math.max(8,l*.45+6)}%)`;x.fillRect(i,0,2,h)}
+  const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,"rgba(255,230,200,.18)");g.addColorStop(1,"rgba(0,0,0,.35)");x.fillStyle=g;x.fillRect(0,0,w,h);
+ },
+ bordeaux(x,w,h,v,r){
+  for(let i=0;i<w;i+=2){const t=i/w,fold=Math.sin(t*Math.PI*9+Math.cos(t*5)*2);const l=18+fold*8;x.fillStyle=`hsl(356,58%,${Math.max(6,l)}%)`;x.fillRect(i,0,2,h)}
+  const g=x.createRadialGradient(w/2,h*.45,10,w/2,h*.45,w*.8);g.addColorStop(0,"rgba(255,200,150,.22)");g.addColorStop(1,"rgba(0,0,0,.45)");x.fillStyle=g;x.fillRect(0,0,w,h);
+ },
+ linen(x,w,h,v,r){
+  x.fillStyle="#DCD6CB";x.fillRect(0,0,w,h);
+  for(let i=0;i<1400;i++){x.fillStyle=r()<.5?"rgba(255,255,255,.25)":"rgba(90,80,70,.07)";x.fillRect(r()*w,r()*h,1+r()*3,1)}
+  const g=x.createRadialGradient(w/2,h/2,10,w/2,h/2,w*.75);g.addColorStop(0,"rgba(255,255,255,.35)");g.addColorStop(1,"rgba(60,50,40,.18)");x.fillStyle=g;x.fillRect(0,0,w,h);
+ }
+};
+const ART={...ART_V,
  peony(x,w,h,v,r){
   wash(x,w,h,r,["rgba(239,169,170,.22)","rgba(252,227,224,.5)","rgba(185,199,168,.2)","rgba(231,185,166,.18)"]);
   const f=x.createLinearGradient(0,h*.75,0,h);f.addColorStop(0,"rgba(255,251,249,0)");f.addColorStop(1,v.paper);x.fillStyle=f;x.fillRect(0,h*.75,w,h*.25);

@@ -14,6 +14,10 @@ export const FLORA = {
   fjord:      { p1: "#FFFFFF", p2: "#CBD9E3", p3: "#7E9CB2", l1: "#A6B9B4", l2: "#5F7C78", e: "#9DB2B0", b: "#3E6A86", gold: "#8EA6B5" },
   carpathian: { p1: "#F0898E", p2: "#C8323A", p3: "#8E1C22", l1: "#5E7A55", l2: "#2E4529", e: "#7A8F76", b: "#1A1A1A", gold: "#B3202A" },
   peony:      { p1: "#FCE3E0", p2: "#EFA9AA", p3: "#C9707A", l1: "#B9C7A8", l2: "#7D9170", e: "#A7BDB6", b: "#E7B9A6", gold: "#C9A36B" },
+  heirloom:   { p1: "#FFFFFF", p2: "#EDEBDD", p3: "#B9BE9C", l1: "#9AA67A", l2: "#5D6A42", e: "#A9B49A", b: "#D9CFA0", gold: "#8C9568" },
+  mocha:      { p1: "#F5EBDD", p2: "#D9C3A6", p3: "#9E7E5E", l1: "#A59A7C", l2: "#5E5640", e: "#A8A08A", b: "#C9A46A", gold: "#B89660" },
+  bordeaux:   { p1: "#E9B8B6", p2: "#A8323B", p3: "#5E1218", l1: "#5E7356", l2: "#2E4229", e: "#7A8B75", b: "#D8B46A", gold: "#C9A35E" },
+  linen:      { p1: "#FBF8F2", p2: "#E2DACB", p3: "#A79B88", l1: "#A3A592", l2: "#5F6250", e: "#A9AD9F", b: "#C9B79A", gold: "#8A7D6E" },
   meadow:     { p1: "#FFF4D6", p2: "#B9A6D9", p3: "#E99A7A", l1: "#B3C38E", l2: "#6F8452", e: "#A8BCA0", b: "#F2C65B", gold: "#B8964F" },
 };
 export const flora = (id) => FLORA[id] || FLORA.lace;
