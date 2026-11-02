@@ -1,10 +1,12 @@
-// Velune Letters · the six designs and their generated artwork
+// Velune Letters · the eight designs and their generated artwork
 export const THEMES={
  lace:{name:"Chantilly",tag:"Ivory lacework and soft gold, for timeless romance",v:{bg:"#EFE9E1",paper:"#FBF8F4",ink:"#3E3328",muted:"#8A7B6A",accent:"#A08660",seal:"#B39566",env:"#E7DED1"},display:'"Cormorant Garamond",Georgia,serif'},
  stained:{name:"Cathedral",tag:"A jewel-tone mosaic under a gothic arch",v:{bg:"#17131C",paper:"#221C29",ink:"#F2E9DA",muted:"#B9AFC2",accent:"#D8B86A",seal:"#7B2D43",env:"#2E2536"},display:'"Cinzel",Georgia,serif'},
  tuscany:{name:"Tuscany",tag:"Olive hills and cypress for Italian villas",v:{bg:"#EADBC6",paper:"#FAF3EA",ink:"#3F3A26",muted:"#7F7558",accent:"#B5652F",seal:"#9C4E25",env:"#E4D3BB"},display:'"Italiana",Georgia,serif'},
  midnight:{name:"Midnight",tag:"Gold stars for an evening ceremony",v:{bg:"#0B1028",paper:"#121A3A",ink:"#EEE8D6",muted:"#A9B0C8",accent:"#D9B76A",seal:"#C49A45",env:"#1C2550"},display:'"Bodoni Moda",Georgia,serif'},
  fjord:{name:"Fjord",tag:"Slate mountains and still water, made in Norway",v:{bg:"#DCE4E9",paper:"#F7F9FA",ink:"#22323E",muted:"#61727F",accent:"#3E6A86",seal:"#2F5068",env:"#CFDAE1"},display:'"Marcellus",Georgia,serif'},
+ peony:{name:"Blush Peony",tag:"Watercolour peonies and a monogram wreath",v:{bg:"#F4E6E2",paper:"#FFFBF9",ink:"#4A3434",muted:"#9A7F7C",accent:"#C08A7E",seal:"#C9858A",env:"#F0DDD8"},display:'"Cormorant Garamond",Georgia,serif',wreath:true},
+ meadow:{name:"Wildflower",tag:"A summer meadow of hand-painted blooms",v:{bg:"#EEF0E2",paper:"#FFFEF8",ink:"#3A3F2C",muted:"#7F846A",accent:"#8E9A5E",seal:"#B4925A",env:"#E6E8D6"},display:'"Italiana",Georgia,serif',meadow:true},
  carpathian:{name:"Carpathian",tag:"Romanian cross-stitch in red and black",v:{bg:"#EDEAE3",paper:"#FFFFFF",ink:"#1A1A1A",muted:"#6B6560",accent:"#B3202A",seal:"#B3202A",env:"#E9E4DA"},display:'"Cinzel",Georgia,serif'}
 };
 
@@ -18,7 +20,17 @@ export function draw(c,id){
   x.fillStyle=v.paper; x.fillRect(0,0,w,h);
   ART[id](x,w,h,v,r);
 }
+const wash=(x,w,h,r,cols)=>{for(let i=0;i<14;i++){const cx=r()*w,cy=r()*h*.9,R=40+r()*110,g=x.createRadialGradient(cx,cy,0,cx,cy,R);g.addColorStop(0,cols[i%cols.length]);g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(0,0,w,h)}};
 const ART={
+ peony(x,w,h,v,r){
+  wash(x,w,h,r,["rgba(239,169,170,.22)","rgba(252,227,224,.5)","rgba(185,199,168,.2)","rgba(231,185,166,.18)"]);
+  const f=x.createLinearGradient(0,h*.75,0,h);f.addColorStop(0,"rgba(255,251,249,0)");f.addColorStop(1,v.paper);x.fillStyle=f;x.fillRect(0,h*.75,w,h*.25);
+ },
+ meadow(x,w,h,v,r){
+  const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,"#E6EEF0");g.addColorStop(.6,"#FBF6E6");g.addColorStop(1,v.paper);x.fillStyle=g;x.fillRect(0,0,w,h);
+  x.beginPath();x.arc(w*.74,h*.3,h*.12,0,7);const s=x.createRadialGradient(w*.74,h*.3,0,w*.74,h*.3,h*.3);s.addColorStop(0,"rgba(242,198,91,.75)");s.addColorStop(1,"rgba(242,198,91,0)");x.fillStyle=s;x.fillRect(0,0,w,h);
+  wash(x,w,h*.6,r,["rgba(185,166,217,.12)","rgba(255,244,214,.4)"]);
+ },
  lace(x,w,h,v,r){
   x.strokeStyle="rgba(160,134,96,.18)";x.lineWidth=1;
   for(let i=-h;i<w;i+=14){x.beginPath();x.moveTo(i,0);x.lineTo(i+h,h);x.stroke();x.beginPath();x.moveTo(i+h,0);x.lineTo(i,h);x.stroke()}

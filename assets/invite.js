@@ -1,12 +1,13 @@
 // Velune Letters · the invitation guests open
 import { T, fmtDate, LANGS } from "./i18n.js";
 import { THEMES, draw } from "./themes.js";
+import { bouquet, divider, wreath, meadow, sealSprig } from "./florals.js";
 import { features } from "./config.js";
 
 export const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 export const DEFAULT_DATA = {
-  theme: "tuscany", lang: "en", langs: ["en", "ro", "no"], music: true, showMeals: true, openParty: 4, petals: true, showGifts: true, giftsText: "", giftsInfo: "",
+  theme: "tuscany", lang: "en", langs: ["en", "ro", "no"], music: true, showMeals: true, openParty: 4, petals: true, florals: true, showGifts: true, giftsText: "", giftsInfo: "",
   p1: "Elena", p2: "Matteo", date: "2027-06-12", time: "16:00",
   venue: "Villa Aurelia", city: "Lake Como, Italy", address: "Villa Aurelia, Lake Como, Italy",
   dress: "Black tie optional", rsvpby: "2027-04-01",
@@ -111,15 +112,20 @@ export function renderInvite(root, raw, opts = {}) {
   const g = opts.guest;
   const firstName = g ? g.name.split(/\s|&/)[0] : "";
   const musicOn = f.music && d.music;
+  const fl = d.florals !== false, id = d.theme;
+  const ORN = () => fl ? `<div class="orn fl">${divider(id)}</div>` : `${ORN()}`;
+  const corners = (a, b) => fl ? `<div class="fl-c ${a}">${bouquet(id)}</div><div class="fl-c ${b}">${bouquet(id, { big: false })}</div>` : "";
 
   root.innerHTML = `
   <div class="stage">
+    ${corners("fl-tl", "fl-br")}
     ${g ? `<p class="kicker">${esc(t.dear.replace("{n}", g.name))}</p>` : ""}
     <div class="env">
       <div class="env-back"></div>
       <div class="env-letter">${esc(d.p1)} &amp; ${esc(d.p2)}</div>
       <div class="env-front"></div>
       <div class="env-flap"></div>
+      ${fl ? `<div class="fl-seal">${sealSprig(id)}</div>` : ""}
       <button class="seal" type="button" aria-label="${esc(t.tap)}">${esc(initials(d))}</button>
     </div>
     <p class="names">${esc(d.p1)} &amp; ${esc(d.p2)}</p>
@@ -127,7 +133,7 @@ export function renderInvite(root, raw, opts = {}) {
   </div>
   <article class="sheet">
     ${musicOn ? `<button class="mus" type="button" aria-pressed="${Music.on}" aria-label="${esc(t.music)}"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wave" d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12"/></svg></button>` : ""}
-    <canvas class="art" data-motif="${d.theme}"></canvas>
+    <div class="art-wrap"><canvas class="art" data-motif="${d.theme}"></canvas>${th.wreath ? `<div class="art-wreath">${wreath(id, esc(initials(d)))}</div>` : ""}${th.meadow ? `<div class="art-meadow">${meadow(id)}</div>` : ""}${corners("fl-tl", "fl-tr")}</div>
     <div class="sec">
       ${g ? `<p class="kicker" style="margin-bottom:10px">${esc(t.dear.replace("{n}", g.name))}</p>` : ""}
       <p class="kicker">${esc(t.together)}</p>
@@ -136,7 +142,7 @@ export function renderInvite(root, raw, opts = {}) {
       <p class="date">${esc(fmtDate(d.date, d.lang, true))}</p>
       <p class="place">${esc(d.time)} · ${esc(d.venue)} · ${esc(d.city)}</p>
     </div>
-    <div class="orn"><span></span></div>
+    ${ORN()}
     <div class="sec">
       <p class="kicker" style="margin-bottom:12px">${esc(t.count)}</p>
       <div class="cd" data-cd="${esc(target(d).toISOString())}">
@@ -147,18 +153,18 @@ export function renderInvite(root, raw, opts = {}) {
         <a class="ibtn" href="${esc(icsHref(d))}" download="wedding.ics">${esc(t.ics)}</a>
       </div>
     </div>
-    ${d.story ? `<div class="orn"><span></span></div><div class="sec"><h3>${esc(t.story)}</h3><p class="story">${esc(d.story)}</p></div>` : ""}
-    ${photos.length ? `<div class="orn"><span></span></div><div class="sec"><h3>${esc(t.gallery)}</h3><div class="gal">${photos.map((p, i) => `<button type="button" class="ph" data-ph="${i}"><img src="${esc(p)}" alt="" loading="lazy"></button>`).join("")}</div></div>` : ""}
-    ${sched ? `<div class="orn"><span></span></div><div class="sec"><h3>${esc(t.schedule)}</h3><ul class="tl">${sched}</ul></div>` : ""}
-    <div class="orn"><span></span></div>
+    ${d.story ? `${ORN()}<div class="sec"><h3>${esc(t.story)}</h3><p class="story">${esc(d.story)}</p></div>` : ""}
+    ${photos.length ? `${ORN()}<div class="sec"><h3>${esc(t.gallery)}</h3><div class="gal">${photos.map((p, i) => `<button type="button" class="ph" data-ph="${i}"><img src="${esc(p)}" alt="" loading="lazy"></button>`).join("")}</div></div>` : ""}
+    ${sched ? `${ORN()}<div class="sec"><h3>${esc(t.schedule)}</h3><ul class="tl">${sched}</ul></div>` : ""}
+    ${ORN()}
     <div class="sec">
       <h3>${esc(t.venue)}</h3>
       <p class="venue-name">${esc(d.venue)}</p><p style="color:var(--i-muted)">${esc(d.city)}</p>
       <a class="ibtn" href="${esc(maps)}" target="_blank" rel="noopener">${esc(t.maps)}</a>
       ${d.dress ? `<div class="dress"><svg viewBox="0 0 120 64" aria-hidden="true"><path d="M30 14l-9 8 4 4v30h22V26l4-4-9-8-6 6z"/><path d="M33 20l3 4 3-4"/><path d="M36 24v26"/><path d="M84 12c-3 0-5 2-5 5l-2 9-11 30h36L91 26l-2-9c0-3-2-5-5-5z"/><path d="M79 26h10"/></svg><p class="kicker">${esc(t.dress)}</p><p class="venue-name" style="font-size:1.15rem">${esc(d.dress)}</p></div>` : ""}
     </div>
-    ${d.showGifts ? `<div class="orn"><span></span></div><div class="sec gifts"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="12" y="26" width="40" height="28" rx="2"/><rect x="9" y="18" width="46" height="9" rx="2"/><path d="M32 18v36"/><path d="M32 18c-4-8-14-10-14-3 0 4 8 3 14 3zM32 18c4-8 14-10 14-3 0 4-8 3-14 3z"/></svg><h3>${esc(t.gifts)}</h3><p class="story">${esc(d.giftsText || t.giftsText)}</p>${d.giftsInfo ? `<p class="gift-info">${esc(d.giftsInfo)}</p>` : ""}</div>` : ""}
-    <div class="orn"><span></span></div>
+    ${d.showGifts ? `${ORN()}<div class="sec gifts"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="12" y="26" width="40" height="28" rx="2"/><rect x="9" y="18" width="46" height="9" rx="2"/><path d="M32 18v36"/><path d="M32 18c-4-8-14-10-14-3 0 4 8 3 14 3zM32 18c4-8 14-10 14-3 0 4-8 3-14 3z"/></svg><h3>${esc(t.gifts)}</h3><p class="story">${esc(d.giftsText || t.giftsText)}</p>${d.giftsInfo ? `<p class="gift-info">${esc(d.giftsInfo)}</p>` : ""}</div>` : ""}
+    ${ORN()}
     <div class="sec rsvp">
       <h3>${esc(t.rsvp)}</h3>
       ${d.rsvpby ? `<p class="kicker">${esc(t.replyBy)} ${esc(fmtDate(d.rsvpby, d.lang, false))}</p>` : ""}
@@ -166,6 +172,7 @@ export function renderInvite(root, raw, opts = {}) {
       <div class="rsvp-body"></div>
     </div>
     ${langBtns}
+    ${fl ? `<div class="fl-end">${corners("fl-bl", "fl-br")}</div>` : ""}
     <p class="ifoot">${esc(t.made)} <b>Velune Letters</b></p>
   </article>
   ${d.petals ? `<canvas class="petals" aria-hidden="true"></canvas>` : ""}

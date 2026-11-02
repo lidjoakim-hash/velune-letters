@@ -100,3 +100,28 @@
 .gift-info{margin-top:12px;font-variant-numeric:tabular-nums;letter-spacing:.06em;color:var(--i-ink);font-size:.95rem}
 .inv canvas.petals{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}
 .full-invite .inv canvas.petals,.guest-page .inv canvas.petals{position:fixed}
+/* watercolour florals */
+.inv .stage{position:relative}
+.inv .stage>*{position:relative;z-index:1}
+.inv .stage>.fl-c{position:absolute;z-index:0}
+.fl-c{position:absolute;width:46%;max-width:250px;pointer-events:none;z-index:3;line-height:0}
+.fl-c+.fl-c{width:36%;max-width:190px}
+.fl-c svg{width:100%;height:auto;display:block;overflow:visible}
+.fl-tl{top:0;left:0}
+.fl-tr{top:0;right:0;transform:scaleX(-1)}
+.fl-bl{bottom:0;left:0;transform:scaleY(-1)}
+.fl-br{bottom:0;right:0;transform:scale(-1,-1)}
+.art-wrap{position:relative}
+.art-wreath{position:absolute;left:50%;top:50%;width:min(240px,64%);transform:translate(-50%,-48%);line-height:0}
+.art-wreath svg,.art-meadow svg{width:100%;height:100%;display:block}
+.art-meadow{position:absolute;left:0;right:0;bottom:0;height:48%;line-height:0}
+.orn.fl{padding:2px 20px;gap:0}
+.orn.fl::before,.orn.fl::after{display:none}
+.orn.fl svg{width:min(260px,82%);height:auto;display:block}
+.fl-end{position:relative;height:150px;margin:-10px 0 -96px;pointer-events:none}
+.fl-end .fl-c,.fl-end .fl-c+.fl-c{width:36%;max-width:200px}
+.ifoot{position:relative;z-index:4;padding-bottom:34px}
+.env .fl-seal{left:50%;top:52%;width:62%;max-width:180px;transform:translate(-50%,-48%);z-index:5;pointer-events:none;line-height:0;transition:opacity .3s}
+.env .fl-seal svg{width:100%;height:auto;display:block}
+.env .seal{z-index:6}
+.inv.opening .fl-seal{opacity:0}

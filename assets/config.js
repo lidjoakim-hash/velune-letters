@@ -24,7 +24,7 @@ export const CONFIG = {
 // Keep them the same as in
 // supabase/functions/create-checkout/index.ts
 export const PLANS = {
-  essential: { name: "Essential", price: 6900,  features: ["Any of the six designs", "One language", "RSVP and guest list", "Personal guest links", "Countdown, schedule and map", "Unlimited guests"] },
+  essential: { name: "Essential", price: 6900,  features: ["Any of the eight designs", "One language", "RSVP and guest list", "Personal guest links", "Countdown, schedule and map", "Unlimited guests"] },
   signature: { name: "Signature", price: 7900, features: ["Launch price for the first 20 couples (normally €149)", "Everything in Essential", "All 12 languages", "Music box melody", "Photo gallery", "See who opened their invitation", "Guest list export"] },
   atelier:   { name: "Atelier",   price: 39000, features: ["Everything in Signature", "A bespoke design made with our designer", "Two revision rounds", "Wedding film and photos added after the day", "Printable card for guests without phones"] },
 };
