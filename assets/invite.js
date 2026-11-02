@@ -4,6 +4,7 @@ import { THEMES, draw } from "./themes.js";
 import { bouquet, divider, wreath, meadow, sealSprig, linerURL } from "./florals.js";
 import { laceEdgeURL, laceOval, laceHeart, baroqueFrame, flourish, icon, manor } from "./vintage.js";
 import { features } from "./config.js";
+import { stamp, postmark, tape, watch, brooch, bow, sprig, key, envelope, rings, tag } from "./stickers.js";
 
 export const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -103,7 +104,7 @@ export function renderInvite(root, raw, opts = {}) {
   const f = features(opts.plan);
   const t = T[d.lang], th = THEMES[d.theme], v = th.v;
   const wasOpen = root.classList.contains("opened");
-  root.className = "inv" + (opts.keepOpen && wasOpen ? " opened" : "");
+  root.className = "inv" + (th.vintage ? " vint" : "") + (opts.keepOpen && wasOpen ? " opened" : "");
   root.style.cssText = `${th.vintage ? `--i-band:${v.band};--i-band-ink:${v.bandInk};--i-lace:${v.lace};` : ""}--i-liner:${linerURL(d.theme)};--i-bg:${v.bg};--i-paper:${v.paper};--i-ink:${v.ink};--i-muted:${v.muted};--i-accent:${v.accent};--i-seal:${v.seal};--i-env:${v.env};--i-display:${th.display}`;
   const maps = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(d.address || d.venue + " " + d.city);
   const sched = d.schedule.filter((s) => s.t || s.x || s.k).map((s) => `<li><time>${esc(s.t)}</time><span>${esc(s.x || t[s.k] || "")}</span></li>`).join("");
@@ -224,15 +225,22 @@ function vintageSheet({ d, t, th, v, g, maps, musicOn, langBtns, photos }) {
   const ik = { arrive: "welcome", ceremony: "ceremony", dinner: "dinner", party: "dance", cake: "cake", car: "car" };
   const order = ["welcome", "ceremony", "dinner", "cake", "dance", "car"];
   const items = d.schedule.filter((s) => s.t || s.x || s.k);
-  const edgePaper = laceEdgeURL(v.lace), edgeBand = laceEdgeURL(v.lace);
+  const edgePaper = laceEdgeURL(v.lace);
   const lace = (cls) => `<div class="vlace ${cls}" style='background-image:${edgePaper}'></div>`;
-  const photo = photos[0];
+  const photo = photos[0], photo2 = photos[1];
   const sw = (th.swatches || []).map((c) => `<i style="background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.45),transparent 45%),linear-gradient(135deg,${c},color-mix(in srgb,${c} 70%,#000))"></i>`).join("");
+  const sage = th.sprig || "#7d8f6a", seal = v.seal, ink = v.ink;
+  const ceremony = (items.find((s) => s.k === "ceremony") || {}).t || d.time || "16:00";
+  const dt = new Date((d.date || "2027-06-12") + "T12:00:00");
+  const pmDate = isNaN(dt) ? "" : `${dt.getDate()} · ${["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][dt.getMonth()]} · ${dt.getFullYear()}`;
+  const S = (html, cls, style = "") => `<div class="vs ${cls}" style="${style}">${html}</div>`;
   return `<article class="sheet vsheet">
     ${musicOn ? `<button class="mus" type="button" aria-pressed="${Music.on}" aria-label="${esc(t.music)}"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wave" d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12"/></svg></button>` : ""}
     <header class="vhero">
       <canvas class="art" data-motif="${d.theme}"></canvas>
       ${d.florals !== false && th.name === "Heirloom Lace" ? `<div class="fl-c fl-tl">${bouquet(d.theme)}</div><div class="fl-c fl-tr">${bouquet(d.theme, { big: false })}</div>` : ""}
+      ${S(stamp(v.paper, v.band, "VELUNE", "1st"), "s-stamp")}${S(postmark(ink, d.city || "Velune", pmDate), "s-pm")}
+      ${S(sprig(sage, v.paper, 3), "s-sprig-l")}
       <div class="vcart">${laceOval(v.lace, v.paper)}<div class="vcart-in">
         ${photo ? `<div class="vphoto"><img src="${esc(photo)}" alt=""></div>` : `<p class="vkick">${esc(t.together)}</p>`}
         <h2 class="vnames">${esc(d.p1)}<span>&amp;</span>${esc(d.p2)}</h2>
@@ -240,28 +248,40 @@ function vintageSheet({ d, t, th, v, g, maps, musicOn, langBtns, photos }) {
       </div></div>
     </header>
     ${lace("down")}
-    <section class="vsec">
-      ${g ? `<p class="kicker">${esc(t.dear.replace("{n}", g.name))}</p>` : ""}
-      ${flourish(v.accent)}
-      <p class="vlead">${esc(t.invite)}</p>
-      ${d.story ? `<p class="story">${esc(d.story)}</p>` : ""}
-      ${calendarHTML(d, d.lang)}
-      <p class="place">${esc(d.time)} · ${esc(d.venue)}</p>
+    <section class="vsec vintro">
+      <div class="vcard torn">
+        ${S(brooch(), "s-brooch")}
+        ${g ? `<p class="kicker">${esc(t.dear.replace("{n}", g.name))}</p>` : ""}
+        ${flourish(v.accent)}
+        <p class="vlead">${esc(t.invite)}</p>
+        ${d.story ? `<p class="story">${esc(d.story)}</p>` : ""}
+      </div>
+      ${S(sprig(sage, v.paper, 7), "s-sprig-r")}
+      <div class="vpost">
+        ${S(tape(v.lace, 110), "s-tape tl")}${S(tape(v.lace, 110), "s-tape tr")}
+        ${calendarHTML(d, d.lang)}
+        <p class="place">${esc(d.time)} · ${esc(d.venue)}</p>
+        ${S(postmark(v.band, d.venue || "Velune", pmDate), "s-pm2")}
+      </div>
     </section>
-    ${items.length ? `${lace("up band-top")}<section class="vsec vband"><div class="vframe">${baroqueFrame(v.accent, v.paper)}<div class="vframe-in">
+    ${items.length ? `${lace("up band-top")}<section class="vsec vband">
+      ${S(watch(ceremony), "s-watch")}
+      <div class="vframe">${baroqueFrame(v.accent, v.paper)}<div class="vframe-in">
       <h3 class="vscript">${esc(t.schedule)}</h3>
       <ul class="vtl">${items.map((s, i) => `<li>${icon(ik[s.k] || order[i % order.length], v.ink)}<div><time>${esc(s.t)}</time><span>${esc(s.x || t[s.k] || "")}</span></div></li>`).join("")}</ul>
-    </div></div></section>${lace("down band-bot")}` : ""}
-    <section class="vsec">
+    </div></div>${S(rings(), "s-rings")}</section>${lace("down band-bot")}` : ""}
+    <section class="vsec vvenue">
       <h3 class="vscript">${esc(t.venue)}</h3>
-      ${manor(v.ink)}
+      <div class="vpola">${S(tape(v.lace, 90), "s-tape tc")}<div class="pic">${photo2 ? `<img src="${esc(photo2)}" alt="">` : `<canvas class="art" data-motif="${d.theme}"></canvas>${manor(v.paper)}`}</div><p>${esc(d.venue)}</p></div>
+      ${S(key(v.accent, seal), "s-key")}
       <p class="venue-name">${esc(d.venue)}</p><p class="vmuted">${esc(d.city)}</p>
       <a class="ibtn fill" href="${esc(maps)}" target="_blank" rel="noopener">${esc(t.maps)}</a>
     </section>
-    ${d.dress ? `<section class="vsec">${flourish(v.accent)}<h3 class="vscript">${esc(t.dress)}</h3><p class="vlead">${esc(d.dress)}</p><div class="vsw">${sw}</div></section>` : ""}
-    ${d.showGifts ? `<section class="vsec"><div class="vnote"><h3 class="vscript">${esc(t.gifts)}</h3><p class="story">${esc(d.giftsText || t.giftsText)}</p>${d.giftsInfo ? `<p class="gift-info">${esc(d.giftsInfo)}</p>` : ""}</div></section>` : ""}
+    ${d.dress ? `<section class="vsec vdress">${S(bow(seal), "s-bow")}${flourish(v.accent)}<h3 class="vscript">${esc(t.dress)}</h3><p class="vlead">${esc(d.dress)}</p><div class="vsw">${sw}</div></section>` : ""}
+    ${d.showGifts ? `<section class="vsec vgift"><div class="vnote">${S(tape(v.lace, 100), "s-tape tc")}<h3 class="vscript">${esc(t.gifts)}</h3><p class="story">${esc(d.giftsText || t.giftsText)}</p>${d.giftsInfo ? `<p class="gift-info">${esc(d.giftsInfo)}</p>` : ""}</div>${S(envelope(v.paper, seal), "s-env")}</section>` : ""}
     ${lace("up band-top")}
     <section class="vsec vband vcount">
+      ${S(sprig(sage, v.paper, 5), "s-sprig-c")}
       <div class="vheart">${laceHeart(v.lace, v.band)}<div class="vheart-in">
         <p class="vkick">${esc(t.count)}</p>
         <div class="cd" data-cd="${esc(target(d).toISOString())}">
@@ -272,13 +292,16 @@ function vintageSheet({ d, t, th, v, g, maps, musicOn, langBtns, photos }) {
     </section>
     ${lace("down band-bot")}
     <section class="vsec rsvp">
+      <div class="vcard torn">
+      ${S(tag(v.paper, ink, "R.S.V.P."), "s-tag")}
       <h3 class="vscript">${esc(t.rsvp)}</h3>
       ${d.rsvpby ? `<p class="kicker">${esc(t.replyBy)} ${esc(fmtDate(d.rsvpby, d.lang, false))}</p>` : ""}
       ${g ? `<p class="line" style="margin-top:8px">${esc(g.party > 1 ? t.seats.replace("{p}", g.party) : t.seat1)}</p>` : ""}
       <div class="rsvp-body"></div>
+      </div>
     </section>
     ${langBtns}
-    <footer class="vend">${flourish(v.accent)}<p class="vnames small">${esc(d.p1)}<span>&amp;</span>${esc(d.p2)}</p><p class="ifoot">${esc(t.made)} <b>Velune Letters</b></p></footer>
+    <footer class="vend">${S(stamp(v.paper, v.band, "WITH LOVE", "♥"), "s-stamp2")}${flourish(v.accent)}<p class="vnames small">${esc(d.p1)}<span>&amp;</span>${esc(d.p2)}</p><p class="ifoot">${esc(t.made)} <b>Velune Letters</b></p></footer>
   </article>`;
 }
 
