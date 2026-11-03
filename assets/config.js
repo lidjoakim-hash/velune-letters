@@ -16,13 +16,11 @@ export const CONFIG = {
   // from admin.html with the Give button. Set to true once Stripe is set up.
   PAYMENTS: true,
 
-  // Stripe Payment Links, one per plan. These are TEST links (sandbox):
-  // pay with card 4242 4242 4242 4242, any future date, any CVC.
-  // Swap them for live links once the Stripe account is activated.
+  // Stripe Payment Links, one per plan (LIVE, real payments).
   PAYMENT_LINKS: {
-    essential: "https://buy.stripe.com/test_14AeVe86g8yG3ClcFA2VG01",
-    signature: "https://buy.stripe.com/test_00waEY86gdT02yhgVQ2VG00",
-    atelier:   "https://buy.stripe.com/test_3cI3cw72caGO8WFcFA2VG02",
+    essential: "https://buy.stripe.com/4gM3cw89H3zu9CZ7jJ5sA01",
+    signature: "https://buy.stripe.com/9B6cN689H5HC2axavV5sA00",
+    atelier:   "https://buy.stripe.com/28E5kEdu14Dy8yVavV5sA02",
   },
 
   BRAND: "Velune Letters",
