@@ -317,3 +317,8 @@
 .vvenue .venue-name{display:none}
 .vint.opening .stage::after{content:"";position:fixed;inset:0;z-index:20;pointer-events:none;background:var(--i-paper) var(--tex) 0 0/360px;background-blend-mode:multiply;opacity:0;animation:vpaper .7s ease 4.55s forwards}
 @keyframes vpaper{to{opacity:1}}
+
+/* save-the-date */
+.sheet.std .std-k{font-size:.9rem;letter-spacing:.42em;margin-bottom:14px}
+.sheet.std .couple{margin-block:6px 14px}
+.sheet.std .std-follow{font-style:italic;color:var(--i-muted);margin:6px 0 22px;text-align:center}

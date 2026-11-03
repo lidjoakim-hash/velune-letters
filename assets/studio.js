@@ -423,7 +423,11 @@ function panePublish() {
           <p>Print this QR code on save-the-date cards, or share the general link in a group chat. For personal greetings and tracking, send links from the Guests tab.</p>
           <div class="toolbar" style="margin-top:0"><button class="btn small primary" id="copy2">Copy general link</button><button class="btn small" id="qrdl">Download QR code</button>
           <a class="btn small ghost" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`${inv.data.p1} & ${inv.data.p2}: ${link}`)}">Share on WhatsApp</a></div>
-        </div></div></div>
+        </div></div>
+        ${inv.plan !== "essential" ? `<div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line)"><h3 style="margin:0 0 6px">Save the date</h3><p class="hint" style="margin:0 0 12px">A short matching card with your names, date, countdown and calendar buttons. Send it months ahead, then the full invitation later.</p>
+          <div class="toolbar" style="margin-top:0"><button class="btn small" id="copystd">Copy save-the-date link</button><a class="btn small ghost" target="_blank" rel="noopener" href="${esc(link + (link.includes("?") ? "&" : "?") + "std")}">Preview</a>
+          <a class="btn small ghost" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`${inv.data.p1} & ${inv.data.p2} · Save the date: ${link}${link.includes("?") ? "&" : "?"}std`)}">Share on WhatsApp</a></div></div>` : ""}
+      </div>
       ${curIdx < PLAN_ORDER.length - 1 ? `<div class="panel"><h2>Upgrade</h2><p class="hint" style="margin:0 0 16px">You only pay the difference.</p><div class="planrow">${plans}</div></div>` : ""}`
     : `<div class="panel" style="margin-top:0"><h2>Publish</h2><p>Choose a plan to make your invitation live. You pay once, and it stays online until 12 months after the wedding.</p>
       ${LINKS ? `<p class="hint">Secure card payment by Stripe. Booked Velune Weddings? Write to us and we'll gift you Signature.</p>` : PAY ? `<p class="hint">Booked Velune Weddings? Enter the code from your planner on the payment page and Signature is free.</p>` : `<p class="hint">Choose a plan and press Request. We confirm by email and publish within 24 hours.</p>`}</div>
@@ -446,6 +450,7 @@ function panePublish() {
   if (paid) {
     $("#toggle").onclick = async () => { try { const r = await api.updateInvitation(inv.id, { status: live ? "draft" : "live" }); inv.status = r.status; renderWorkspace(); toast(inv.status === "live" ? "Your invitation is live" : "Invitation paused"); } catch (e) { toast(e.message); } };
     $("#copy2").onclick = () => copy(link, "Link copied");
+    if ($("#copystd")) $("#copystd").onclick = () => copy(link + "&std", "Save-the-date link copied");
     const qc = $("#qr"); const ok = drawQR(qc, link);
     $("#qrdl").onclick = () => { if (!ok) return toast("QR code could not load. Check your connection."); qc.toBlob((b) => download(`qr-${inv.slug}.png`, b)); };
   }

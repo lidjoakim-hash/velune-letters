@@ -99,6 +99,34 @@ const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)
  * opts: { plan, guest:{name,party}, rsvp:{...}, onRsvp: async(payload)=>void,
  *         keepOpen, preview (studio preview), onLang(lang) }
  */
+const FOLLOW = { en: "Formal invitation to follow", ro: "Invitația oficială urmează", no: "Invitasjon følger", it: "Seguirà l'invito ufficiale", es: "Invitación formal a continuación", fr: "Faire-part à suivre", de: "Einladung folgt", pt: "Convite formal a seguir", sv: "Inbjudan kommer senare", da: "Invitation følger", pl: "Zaproszenie wkrótce", nl: "Uitnodiging volgt" };
+const STD = { en: "Save the date", ro: "Salvați data", no: "Sett av datoen", it: "Save the date", es: "Reserva la fecha", fr: "Réservez la date", de: "Save the Date", pt: "Reserve a data", sv: "Spara datumet", da: "Sæt kryds i kalenderen", pl: "Zarezerwuj datę", nl: "Save the date" };
+function stdSheet({ d, t, fl, corners, langBtns }) {
+  return `<article class="sheet std">
+    <div class="art-wrap"><canvas class="art" data-motif="${d.theme}"></canvas>${corners("fl-tl", "fl-tr")}</div>
+    <div class="sec">
+      <p class="kicker std-k">${esc(STD[d.lang] || STD.en)}</p>
+      <h2 class="couple">${esc(d.p1)}<span class="amp">&amp;</span>${esc(d.p2)}</h2>
+      <p class="date">${esc(fmtDate(d.date, d.lang, true))}</p>
+      <p class="place">${esc(d.city)}</p>
+    </div>
+    <div class="sec">
+      <p class="kicker" style="margin-bottom:12px">${esc(t.count)}</p>
+      <div class="cd" data-cd="${esc(target(d).toISOString())}">
+        <div><b data-u="d">0</b><small>${esc(t.days)}</small></div><div><b data-u="h">00</b><small>${esc(t.hours)}</small></div><div><b data-u="m">00</b><small>${esc(t.minutes)}</small></div><div><b data-u="s">00</b><small>${esc(t.seconds)}</small></div>
+      </div>
+      <div class="cal">
+        <a class="ibtn fill" href="${esc(googleCal(d))}" target="_blank" rel="noopener">${esc(t.google)}</a>
+        <a class="ibtn" href="${esc(icsHref(d))}" download="wedding.ics">${esc(t.ics)}</a>
+      </div>
+    </div>
+    <p class="line std-follow">${esc(FOLLOW[d.lang] || FOLLOW.en)}</p>
+    ${langBtns}
+    ${fl ? `<div class="fl-end">${corners("fl-bl", "fl-br")}</div>` : ""}
+    <p class="ifoot">${esc(t.made)} <b>Velune Letters</b></p>
+  </article>`;
+}
+
 export function renderInvite(root, raw, opts = {}) {
   const d = withDefaults(raw);
   const f = features(opts.plan);
@@ -135,7 +163,7 @@ export function renderInvite(root, raw, opts = {}) {
     <p class="names">${esc(d.p1)} &amp; ${esc(d.p2)}</p>
     <p class="tap">${esc(t.tap)}</p>
   </div>
-  ${th.vintage ? vintageSheet({ d, t, th, v, g, maps, musicOn, langBtns, photos }) : `
+  ${opts.std ? stdSheet({ d, t, fl, corners, langBtns }) : th.vintage ? vintageSheet({ d, t, th, v, g, maps, musicOn, langBtns, photos }) : `
   <article class="sheet">
     ${musicOn ? `<button class="mus" type="button" aria-pressed="${Music.on}" aria-label="${esc(t.music)}"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wave" d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12"/></svg></button>` : ""}
     <div class="art-wrap"><canvas class="art" data-motif="${d.theme}"></canvas>${th.wreath ? `<div class="art-wreath">${wreath(id, esc(initials(d)))}</div>` : ""}${th.meadow ? `<div class="art-meadow">${meadow(id)}</div>` : ""}${corners("fl-tl", "fl-tr")}</div>
@@ -202,7 +230,7 @@ export function renderInvite(root, raw, opts = {}) {
   const lb = root.querySelector(".lightbox");
   root.querySelectorAll("[data-ph]").forEach((b) => b.addEventListener("click", () => { lb.querySelector("img").src = photos[+b.dataset.ph]; lb.hidden = false; }));
   lb.addEventListener("click", () => { lb.hidden = true; });
-  rsvpForm(root.querySelector(".rsvp-body"), d, opts, opts.rsvp || null);
+  const rb = root.querySelector(".rsvp-body"); if (rb) rsvpForm(rb, d, opts, opts.rsvp || null);
   tick();
   if (root.classList.contains("opened")) { requestAnimationFrame(paint); startPetals(); }
   return { open };

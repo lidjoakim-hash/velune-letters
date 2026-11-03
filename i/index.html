@@ -47,7 +47,7 @@ else {
   const offered = (data.langs && data.langs.length ? data.langs : [data.lang]);
   const pick = browserLang === "nb" || browserLang === "nn" ? "no" : browserLang;
   if (inv.plan !== "essential" && offered.includes(pick)) data.lang = pick;
-  document.title = `${data.p1} & ${data.p2} · Velune Letters`;
+  document.title = `${data.p1} & ${data.p2} · ${new URLSearchParams(location.search).has("std") ? "Save the date" : "Velune Letters"}`;
   document.documentElement.lang = data.lang === "no" ? "nb" : data.lang;
   if (inv.draft) {
     const bar = document.createElement("div"); bar.className = "draft-bar";
@@ -57,6 +57,7 @@ else {
   const holder = document.createElement("div"); root.replaceChildren(holder);
   const opts = {
     plan: inv.plan, guest: inv.guest, rsvp: inv.rsvp,
+    std: new URLSearchParams(location.search).has("std") && (inv.plan !== "essential" || slug === "demo"),
     onRsvp: (p) => api.submitRsvp(inv.slug, gcode, p),
     onLang: (l) => { data.lang = l; renderInvite(holder, data, Object.assign(opts, { keepOpen: true })); window.scrollTo(0, 0); },
     onOpen: () => window.scrollTo(0, 0),
