@@ -265,7 +265,7 @@
 .vhero .s-sprig-l{width:26%;left:-3%;bottom:2%;transform:rotate(-14deg)}
 /* torn paper cards */
 .vcard{position:relative;margin:6px auto 0;max-width:420px;padding:44px 26px 40px;background:#fffdf8 var(--tex) 0 0/300px;background-blend-mode:multiply;box-shadow:0 14px 30px -18px rgba(40,25,10,.45),0 2px 5px rgba(40,25,10,.08)}
-.vcard.torn{--m:var(--torn),linear-gradient(#000,#000),var(--tornb);-webkit-mask-image:var(--m);mask-image:var(--m);-webkit-mask-size:100% 30px,100% calc(100% - 58px),100% 30px;mask-size:100% 30px,100% calc(100% - 58px),100% 30px;-webkit-mask-position:top,center,bottom;mask-position:top,center,bottom;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;box-shadow:none;filter:drop-shadow(0 10px 14px rgba(40,25,10,.22))}
+.vcard.torn{--m:var(--torn),linear-gradient(#000,#000),var(--tornb);-webkit-mask-image:var(--m);mask-image:var(--m);-webkit-mask-size:100% 30px,100% calc(100% - 58px),100% 30px;mask-size:100% 30px,100% calc(100% - 58px),100% 30px;-webkit-mask-position:top,center,bottom;mask-position:top,center,bottom;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;box-shadow:none}
 .vintro .vcard{transform:rotate(-.6deg)}
 .vcard .s-brooch{width:62px;left:50%;top:8px;margin-left:-31px}
 .vintro .s-sprig-r{width:24%;right:-4%;top:40px;transform:rotate(18deg)}
