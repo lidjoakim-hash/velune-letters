@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>send</title>
+<body style="font:16px sans-serif;padding:20px">working…
+<script>
+const f=new URLSearchParams(location.search).get('f');
+fetch(f).then(r=>r.blob()).then(b=>{
+  const file=new File([b],f.split('/').pop(),{type:'video/mp4'});
+  if(!window.opener){document.body.textContent='no opener';return;}
+  window.opener.postMessage({vfile:file},'*');
+  document.body.textContent='sent '+b.size;
+  setTimeout(()=>window.close(),1500);
+}).catch(e=>document.body.textContent='ERR '+e);
+</script>
