@@ -396,3 +396,36 @@
 .iloop span{display:block;font-family:var(--i-display);font-size:1.05rem}
 .iloop b{display:block;margin-top:4px;font-weight:500;font-size:.85rem;color:var(--i-accent)}
 .iloop small{display:block;margin-top:8px;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--i-muted)}
+.inv .stage .tap{min-width:min(300px,86%);text-align:center}
+
+/* ===== full-screen envelope (the whole screen is the letter) ===== */
+.inv:not(.has-gate) .stage{padding:0;gap:0;overflow:hidden}
+.inv .stage .env{position:absolute;inset:0;width:auto;height:auto;max-width:none;aspect-ratio:auto;animation:none;perspective:1600px}
+.inv .stage .env-back{border-radius:0;background:color-mix(in srgb,var(--i-env) 80%,#000) var(--tex) 0 0/360px;background-blend-mode:multiply}
+.inv .stage .env-front{border-radius:0;clip-path:polygon(0 0,50% 50%,100% 0,100% 100%,0 100%);background:var(--i-env) var(--tex) 0 0/360px;background-blend-mode:multiply;box-shadow:none}
+.inv .stage .env-front::before{content:"";position:absolute;inset:0;background:linear-gradient(to top right,transparent 49.6%,rgba(0,0,0,.10) 50%,transparent 51.2%),linear-gradient(to top left,transparent 49.6%,rgba(0,0,0,.10) 50%,transparent 51.2%);clip-path:polygon(0 100%,50% 50%,100% 100%)}
+.inv .stage .env-flap{height:52%;background:color-mix(in srgb,var(--i-env) 94%,#000) var(--tex) 0 0/360px;background-blend-mode:multiply;filter:drop-shadow(0 6px 10px rgba(0,0,0,.18))}
+.inv .stage .env-letter{left:6%;right:6%;top:5%;bottom:4%;font-size:2.2rem;padding-top:22%}
+.inv .stage .env-glow{inset:10% 0;opacity:.22}
+.inv .stage .seal{top:50%;width:112px;height:112px;margin:-56px 0 0 -56px;font-size:2.4rem}
+.inv .stage .env .shard,.inv .stage .env .spark{top:50%}
+.inv .stage .fl-seal{top:50%}
+.inv:not(.has-gate) .stage .names{position:absolute;left:0;right:0;bottom:21%;z-index:6;font-size:2.7rem;pointer-events:none}
+.inv:not(.has-gate) .stage .tap{position:absolute;left:0;right:0;bottom:13%;z-index:6;margin:0 auto}
+.inv:not(.has-gate) .stage>.kicker{position:absolute;top:58%;left:0;right:0;z-index:6}
+.inv:not(.has-gate) .stage>.fl-c{z-index:7}
+@keyframes fsletter{0%{transform:none}40%{transform:translateY(-22%)}100%{transform:translateY(-2%) scale(1.06)}}
+@keyframes fsdrop{to{transform:translateY(105%)}}
+.inv.opening .stage .env-letter,.vint.opening .stage .env-letter{animation:fsletter 2.2s cubic-bezier(.5,0,.2,1) 3s both;z-index:2}
+.inv.opening .stage .env-front,.inv.opening .stage .env-back{animation:fsdrop 1s cubic-bezier(.6,0,.4,1) 4s both}
+.inv.opening .stage .names,.inv.opening .stage .tap{opacity:0;transition:opacity .4s}
+/* envelope colours per design (full-screen letter) */
+.inv[data-theme=mocha]{--i-env:#5E4334 !important;--i-seal:#C2A066 !important}
+.inv[data-theme=mocha] .stage .names,.inv[data-theme=mocha] .stage .tap,.inv[data-theme=bordeaux] .stage .names,.inv[data-theme=bordeaux] .stage .tap,.inv[data-theme=tuscany] .stage .names,.inv[data-theme=tuscany] .stage .tap{color:#F6EEE2}
+.inv[data-theme=bordeaux]{--i-env:#6A1E28 !important;--i-seal:#C2A066 !important}
+.inv[data-theme=heirloom]{--i-env:#A9B391 !important;--i-seal:#B8975A !important}
+.inv[data-theme=fjord]{--i-env:#9FB3C3 !important}
+.inv[data-theme=peony]{--i-env:#E7C3BB !important}
+.inv[data-theme=meadow]{--i-env:#C7CDA6 !important}
+.inv[data-theme=tuscany]{--i-env:#C08458 !important;--i-seal:#6E3216 !important}
+.inv[data-theme=linen]{--i-env:#CFC6B6 !important}
