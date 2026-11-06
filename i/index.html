@@ -67,6 +67,17 @@ else {
     const { THEMES } = await import("../assets/themes.js");
     if (t && THEMES[t]) data.theme = t;
     const sp = new URLSearchParams(location.search), o = sp.get("o"), pp = sp.get("p");
+    const c = (sp.get("c") || "").toLowerCase();
+    if (c) {
+      const { COUNTRIES } = await import("../assets/countries.js");
+      const k = COUNTRIES[c];
+      if (k) {
+        Object.assign(data, { lang: k.lang, langs: k.lang === "en" ? ["en"] : [k.lang, "en"], p1: k.p1, p2: k.p2, venue: k.venue, city: k.city, address: `${k.venue}, ${k.city}`, dress: k.dress, story: k.story });
+        if (!(t && THEMES[t])) data.theme = k.theme;
+        document.title = `${k.p1} & ${k.p2} · Velune Letters`;
+        document.documentElement.lang = k.lang === "no" ? "nb" : k.lang;
+      }
+    }
     if (["seal", "bow", "curtain"].includes(o)) data.opening = o;
     if (["smooth", "embossed", "linen", "watercolour"].includes(pp)) data.paper = pp;
     const cta = document.createElement("a"); cta.className = "demo-cta";

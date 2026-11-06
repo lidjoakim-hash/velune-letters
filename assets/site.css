@@ -337,3 +337,7 @@ footer .fl-md{position:absolute;left:0;right:0;top:0;width:100%;height:110px;poi
 
 .screen .inv.has-gate .stage{position:absolute;inset:0;min-height:0}
 .op-art.oa-bow::after{content:"";position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-30%);border-radius:6px;background:radial-gradient(circle at 40% 35%,#fffaf1,#d8cab4);box-shadow:0 2px 5px rgba(0,0,0,.2);z-index:2}
+.ctry{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.ctry a{display:block;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);text-decoration:none;color:var(--fg);transition:border-color .2s,transform .2s}
+.ctry a:hover{border-color:var(--accent);transform:translateY(-2px)}
+.ctry b{display:block;font-weight:500}.ctry span{display:block;font-size:.8rem;color:var(--muted);margin-top:2px}

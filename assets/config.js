@@ -32,7 +32,7 @@ export const CONFIG = {
 // supabase/functions/create-checkout/index.ts
 export const PLANS = {
   essential: { name: "Essential", price: 6900,  features: ["Any of the twelve designs", "One language", "RSVP and guest list", "Personal guest links", "Countdown, schedule and map", "Unlimited guests"] },
-  signature: { name: "Signature", price: 7900, features: ["Launch price for the first 20 couples (normally €149)", "Everything in Essential", "All 12 languages", "Satin bow or velvet curtain opening", "Embossed, linen or watercolour paper", "Music box melody", "Photo gallery", "See who opened their invitation", "Guest list export"] },
+  signature: { name: "Signature", price: 7900, features: ["Launch price for the first 20 couples (normally €149)", "Everything in Essential", "All 27 languages", "Satin bow or velvet curtain opening", "Embossed, linen or watercolour paper", "Music box melody", "Photo gallery", "See who opened their invitation", "Guest list export"] },
   atelier:   { name: "Atelier",   price: 39000, features: ["Everything in Signature", "A bespoke design made with our designer", "Two revision rounds", "Wedding film and photos added after the day", "Printable card for guests without phones"] },
 };
 export const PLAN_ORDER = ["essential", "signature", "atelier"];
