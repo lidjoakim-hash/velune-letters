@@ -215,7 +215,7 @@ function paneDesign() {
     <div class="panel"><h2>Opening</h2><p class="hint" style="margin:0 0 10px">How guests open your invitation</p>
       <div class="chips">${Object.entries(OPENINGS).map(([id, n]) => `<button class="chip" aria-pressed="${id === (d.opening || "seal")}" data-opening="${id}">${esc(n)}</button>`).join("")}</div>
       <p class="hint" style="margin:16px 0 10px">Paper finish</p>
-      <div class="chips">${Object.entries(PAPERS).map(([id, n]) => `<button class="chip" aria-pressed="${id === (d.paper || "smooth")}" data-paper="${id}">${esc(n)}</button>`).join("")}</div></div>
+      <div class="chips">${Object.entries(PAPERS).map(([id, n]) => `<button class="chip" aria-pressed="${id === (d.paper || "smooth")}" data-paper="${id}">${esc(n)}</button>`).join("")}</div>${locked("The bow, curtains and paper finishes")}</div>
     <div class="panel"><h2>Languages</h2>
       <p class="hint" style="margin:0 0 10px">Main language</p>
       <div class="chips">${LANGS.map((l) => `<button class="chip" aria-pressed="${l === d.lang}" data-lang="${l}">${esc(T[l].label)}</button>`).join("")}</div>

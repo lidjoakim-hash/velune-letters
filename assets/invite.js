@@ -133,9 +133,9 @@ export function renderInvite(root, raw, opts = {}) {
   const f = features(opts.plan);
   const t = T[d.lang], th = THEMES[d.theme], v = th.v;
   const wasOpen = root.classList.contains("opened");
-  const gateKind = ["bow", "curtain"].includes(d.opening) ? d.opening : "";
+  const gateKind = f.openings && ["bow", "curtain"].includes(d.opening) ? d.opening : "";
   root.className = "inv" + (th.vintage ? " vint" : "") + (gateKind ? " has-gate" : "") + (opts.keepOpen && wasOpen ? " opened" : "");
-  root.dataset.paper = d.paper || "smooth";
+  root.dataset.paper = f.openings ? d.paper || "smooth" : "smooth";
   root.style.cssText = `${th.vintage ? `--i-band:${v.band};--i-band-ink:${v.bandInk};--i-lace:${v.lace};` : ""}--i-liner:${linerURL(d.theme)};--i-bg:${v.bg};--i-paper:${v.paper};--i-ink:${v.ink};--i-muted:${v.muted};--i-accent:${v.accent};--i-seal:${v.seal};--i-env:${v.env};--i-display:${th.display}${PAPER_TILE.embossed ? `;--damask:${PAPER_TILE.embossed}` : ""}`;
   const maps = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(d.address || d.venue + " " + d.city);
   const sched = d.schedule.filter((s) => s.t || s.x || s.k).map((s) => `<li><time>${esc(s.t)}</time><span>${esc(s.x || t[s.k] || "")}</span></li>`).join("");
