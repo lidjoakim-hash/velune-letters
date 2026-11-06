@@ -322,3 +322,73 @@
 .sheet.std .std-k{font-size:.9rem;letter-spacing:.42em;margin-bottom:14px}
 .sheet.std .couple{margin-block:6px 14px}
 .sheet.std .std-follow{font-style:italic;color:var(--i-muted);margin:6px 0 22px;text-align:center}
+
+/* ===== alternative openings: gatefold with satin bow, velvet curtains ===== */
+.inv.has-gate .stage>:not(.gate){visibility:hidden}
+.inv.has-gate .stage{padding:0}
+.gate,.inv .stage>.gate{position:absolute;inset:0;z-index:5;cursor:pointer;overflow:hidden;-webkit-tap-highlight-color:transparent;
+  --g-satin:color-mix(in srgb,var(--i-accent) 18%,#f3ece2);--g-satin-hi:#fffdf8;--g-satin-lo:color-mix(in srgb,var(--i-accent) 40%,#bfb09b);
+  --g-vel:color-mix(in srgb,var(--i-seal) 85%,#000);--g-vel-hi:color-mix(in srgb,var(--i-seal) 80%,#fff 8%);--g-vel-lo:color-mix(in srgb,var(--i-seal) 45%,#000)}
+.gate .g-label{position:absolute;left:0;right:0;bottom:9%;text-align:center;z-index:6;transition:opacity .5s}
+.gate .g-names{font-family:"Pinyon Script",cursive;font-size:2.1rem;line-height:1.1;color:var(--i-ink);margin:0}
+.gate .g-tap{margin:10px 0 0;font-size:.68rem;letter-spacing:.32em;text-transform:uppercase;color:var(--i-muted);animation:pulse 2.4s ease-in-out infinite}
+/* gatefold */
+.g-gatefold{perspective:1600px;background:color-mix(in srgb,var(--i-paper) 70%,#000 6%)}
+.g-door{position:absolute;top:0;bottom:0;width:50.2%;
+  background:var(--art) 50% 44%/82% auto no-repeat,var(--tex) 0 0/360px,var(--i-paper);background-blend-mode:normal,multiply,normal;
+  transition:transform 1.5s cubic-bezier(.55,0,.25,1) .95s,box-shadow 1.5s ease .95s;backface-visibility:hidden}
+.g-door.l{left:0;transform-origin:0 50%;box-shadow:inset -14px 0 22px -16px rgba(60,40,20,.45)}
+.g-door.r{right:0;transform-origin:100% 50%;box-shadow:inset 14px 0 22px -16px rgba(60,40,20,.45)}
+.g-door::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.18),rgba(255,255,255,0) 40%,rgba(0,0,0,.04));pointer-events:none}
+.g-door.r::after{transform:scaleX(-1)}
+.g-band{position:absolute;left:0;right:0;top:calc(44% - 15px);height:30px;z-index:3;
+  background:linear-gradient(180deg,var(--g-satin-lo),var(--g-satin-hi) 30%,var(--g-satin) 55%,var(--g-satin-lo));
+  box-shadow:0 6px 12px -6px rgba(0,0,0,.35);clip-path:inset(0 0 0 0);transition:clip-path .7s cubic-bezier(.6,0,.3,1) .35s}
+.g-bow{position:absolute;left:50%;top:44%;width:min(270px,70%);transform:translate(-50%,-44%);z-index:4;overflow:visible}
+.g-bow g{transform-box:fill-box;transition:transform .55s cubic-bezier(.5,0,.3,1),opacity .45s ease}
+.g-bow .loop.l{transform-origin:100% 80%}.g-bow .loop.r{transform-origin:0 80%}
+.g-bow .tail.l{transform-origin:100% 0}.g-bow .tail.r{transform-origin:0 0}
+.g-bow .knot{transform-origin:50% 50%}
+.inv.gating .g-bow .loop.l{transform:rotate(-40deg) scale(.15);opacity:0}
+.inv.gating .g-bow .loop.r{transform:rotate(40deg) scale(.15);opacity:0}
+.inv.gating .g-bow .tail.l{transform:translate(-30px,90px) rotate(18deg);opacity:0;transition-delay:.15s}
+.inv.gating .g-bow .tail.r{transform:translate(30px,90px) rotate(-18deg);opacity:0;transition-delay:.15s}
+.inv.gating .g-bow .knot{transform:scale(0);opacity:0;transition-delay:.3s}
+.inv.gating .g-band{clip-path:inset(0 50% 0 50%)}
+.inv.gating .g-door.l{transform:rotateY(-104deg);box-shadow:inset -40px 0 50px -10px rgba(0,0,0,.35)}
+.inv.gating .g-door.r{transform:rotateY(104deg);box-shadow:inset 40px 0 50px -10px rgba(0,0,0,.35)}
+.inv.gating .gate .g-label{opacity:0}
+.inv.gating .g-gatefold{animation:fadeout .45s ease 2.15s forwards}
+/* curtains */
+.g-curtain{background:radial-gradient(ellipse at 50% 35%,color-mix(in srgb,var(--i-paper) 85%,#fff3d6),color-mix(in srgb,var(--i-paper) 70%,#000 12%))}
+.g-drape{position:absolute;top:0;bottom:0;width:53%;z-index:2;
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(0,0,0,0) 30%,rgba(0,0,0,.25)),
+    repeating-linear-gradient(90deg,var(--g-vel-lo) 0,var(--g-vel) 7px,var(--g-vel-hi) 15px,var(--g-vel) 23px,var(--g-vel-lo) 32px);
+  transition:transform 1.75s cubic-bezier(.65,0,.25,1) .2s,filter 1.75s ease .2s}
+.g-drape.l{left:0;border-radius:0 0 40% 0/0 0 6% 0;box-shadow:12px 0 30px -10px rgba(0,0,0,.5)}
+.g-drape.r{right:0;border-radius:0 0 0 40%/0 0 0 6%;box-shadow:-12px 0 30px -10px rgba(0,0,0,.5)}
+.g-drape .tie{position:absolute;top:58%;width:30px;height:10px;border-radius:6px;background:linear-gradient(180deg,#f3dc9e,#b8924f 60%,#8c6a33)}
+.g-drape.l .tie{left:12%}.g-drape.r .tie{right:12%}
+.g-drape .tie::after{content:"";position:absolute;left:9px;top:8px;width:12px;height:34px;border-radius:2px 2px 6px 6px;background:repeating-linear-gradient(90deg,#b8924f 0 2px,#f0d898 2px 3px);box-shadow:0 4px 6px rgba(0,0,0,.3)}
+.g-valance{position:absolute;left:-2%;right:-2%;top:0;height:74px;z-index:3;
+  background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,0) 55%),repeating-linear-gradient(90deg,var(--g-vel-lo) 0,var(--g-vel) 10px,var(--g-vel-hi) 20px,var(--g-vel) 30px,var(--g-vel-lo) 40px);
+  -webkit-mask:radial-gradient(circle at 36px 0,#000 37px,transparent 38px) 0 4px/72px 74px repeat-x,linear-gradient(#000,#000) 0 0/100% 40px no-repeat;
+  mask:radial-gradient(circle at 36px 0,#000 37px,transparent 38px) 0 4px/72px 74px repeat-x,linear-gradient(#000,#000) 0 0/100% 40px no-repeat;
+  filter:drop-shadow(0 2px 0 #d8b46a);transition:transform 1.2s cubic-bezier(.6,0,.3,1) 1s}
+.g-curtain .g-label{bottom:auto;top:42%;z-index:1}
+.g-curtain .g-names{color:var(--i-ink)}
+.g-curtain .g-label{top:20%;z-index:5;pointer-events:none}.g-curtain .g-label .g-names{color:#f6e7c4;text-shadow:0 2px 8px rgba(0,0,0,.6)}.g-curtain .g-label .g-tap{display:none}.g-curtain::after{color:#f1dca6!important;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.inv.gating .g-drape.l{transform:translateX(-96%) scaleX(.55);filter:brightness(.85)}
+.inv.gating .g-drape.r{transform:translateX(96%) scaleX(.55);filter:brightness(.85)}
+.inv.gating .g-drape.l{transform-origin:0 50%}.inv.gating .g-drape.r{transform-origin:100% 50%}
+.inv.gating .g-valance{transform:translateY(-110%)}
+.inv.gating .g-curtain .g-label{opacity:0}
+.inv.gating .g-curtain{animation:fadeout .45s ease 1.85s forwards}
+.g-curtain::after{content:"";position:absolute;left:50%;bottom:10%;transform:translateX(-50%);z-index:4;font-size:.68rem;letter-spacing:.32em;text-transform:uppercase;color:#f4e7c7;opacity:.9;content:attr(aria-label);animation:pulse 2.4s ease-in-out infinite;white-space:nowrap}
+.inv.gating .g-curtain::after{opacity:0}
+/* paper finishes on the opened invitation */
+.inv[data-paper=embossed] .sheet{background-image:var(--damask);background-size:80px}
+.inv[data-paper=embossed] .vsheet{background-image:var(--damask),var(--tex);background-size:80px,360px}
+.inv[data-paper=linen] .sheet{background-image:url(tex/linen.jpg);background-size:300px;background-blend-mode:multiply}
+.inv[data-paper=linen] .vsheet{background-image:url(tex/linen.jpg);background-size:300px;background-blend-mode:multiply}
+.inv[data-paper=watercolour] .sheet,.inv[data-paper=watercolour] .vsheet{background-image:radial-gradient(ellipse 60% 22% at 18% 12%,color-mix(in srgb,var(--i-accent) 16%,transparent),transparent 70%),radial-gradient(ellipse 50% 18% at 85% 38%,color-mix(in srgb,var(--i-seal) 12%,transparent),transparent 70%),radial-gradient(ellipse 70% 20% at 30% 70%,color-mix(in srgb,var(--i-accent) 12%,transparent),transparent 70%),radial-gradient(ellipse 55% 16% at 80% 92%,color-mix(in srgb,var(--i-seal) 10%,transparent),transparent 70%)}

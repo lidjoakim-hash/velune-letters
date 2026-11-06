@@ -7,6 +7,7 @@ const pend = { get() { try { return JSON.parse(localStorage.getItem("vl-pay") ||
 import { T, LANGS, fmtDate } from "./i18n.js";
 import { THEMES, draw } from "./themes.js";
 import { renderInvite, withDefaults, esc, Music, clone } from "./invite.js";
+import { OPENINGS, PAPERS } from "./openings.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -211,6 +212,10 @@ function paneDesign() {
   pane.innerHTML = `
     <div class="panel" style="margin-top:0"><h2>Design</h2><div class="chips">${Object.entries(THEMES).map(([id, th]) => `<button class="chip" aria-pressed="${id === d.theme}" data-theme="${id}"><span class="sw" style="background:linear-gradient(135deg,${th.v.accent} 50%,${th.v.paper} 50%)"></span>${esc(th.name)}</button>`).join("")}</div>
       <p class="hint" id="theme-tag">${esc(THEMES[d.theme].tag)}</p></div>
+    <div class="panel"><h2>Opening</h2><p class="hint" style="margin:0 0 10px">How guests open your invitation</p>
+      <div class="chips">${Object.entries(OPENINGS).map(([id, n]) => `<button class="chip" aria-pressed="${id === (d.opening || "seal")}" data-opening="${id}">${esc(n)}</button>`).join("")}</div>
+      <p class="hint" style="margin:16px 0 10px">Paper finish</p>
+      <div class="chips">${Object.entries(PAPERS).map(([id, n]) => `<button class="chip" aria-pressed="${id === (d.paper || "smooth")}" data-paper="${id}">${esc(n)}</button>`).join("")}</div></div>
     <div class="panel"><h2>Languages</h2>
       <p class="hint" style="margin:0 0 10px">Main language</p>
       <div class="chips">${LANGS.map((l) => `<button class="chip" aria-pressed="${l === d.lang}" data-lang="${l}">${esc(T[l].label)}</button>`).join("")}</div>
@@ -225,6 +230,8 @@ function paneDesign() {
         ${d.photos.length < 9 ? `<label class="add">+ Add photos<input type="file" accept="image/*" multiple id="addph" ${ess ? "disabled" : ""}></label>` : ""}</div>
       <p class="hint">Up to 9 photos. The first one is shown largest.</p>${locked("The photo gallery")}</div>`;
   $$("[data-theme]", pane).forEach((b) => (b.onclick = () => { d.theme = b.dataset.theme; $$("[data-theme]", pane).forEach((x) => x.setAttribute("aria-pressed", String(x === b))); $("#theme-tag").textContent = THEMES[d.theme].tag; change(); }));
+  $$("[data-opening]", pane).forEach((b) => (b.onclick = () => { d.opening = b.dataset.opening; $$("[data-opening]", pane).forEach((x) => x.setAttribute("aria-pressed", String(x === b))); change(); }));
+  $$("[data-paper]", pane).forEach((b) => (b.onclick = () => { d.paper = b.dataset.paper; $$("[data-paper]", pane).forEach((x) => x.setAttribute("aria-pressed", String(x === b))); change(); }));
   $$("[data-lang]", pane).forEach((b) => (b.onclick = () => { d.lang = b.dataset.lang; if (!d.langs.includes(d.lang)) d.langs.push(d.lang); paneDesign(); change(); }));
   $$("[data-langs]", pane).forEach((c) => (c.onchange = () => { const l = c.dataset.langs; d.langs = c.checked ? Array.from(new Set([...d.langs, l])) : d.langs.filter((x) => x !== l); if (!d.langs.includes(d.lang)) d.langs.push(d.lang); paneDesign(); change(); }));
   $("#music").onchange = (e) => { d.music = e.target.checked; change(); };

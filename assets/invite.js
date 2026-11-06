@@ -5,11 +5,12 @@ import { bouquet, divider, wreath, meadow, sealSprig, linerURL } from "./florals
 import { laceEdgeURL, laceOval, laceHeart, baroqueFrame, flourish, icon, manor } from "./vintage.js";
 import { features } from "./config.js";
 import { stamp, postmark, tape, watch, brooch, bow, sprig, key, envelope, rings, tag } from "./stickers.js";
+import { gateHTML, PAPER_TILE, GATE_MS, TAP_GATE } from "./openings.js";
 
 export const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 export const DEFAULT_DATA = {
-  theme: "tuscany", lang: "en", langs: ["en", "ro", "no"], music: true, showMeals: true, openParty: 4, petals: true, florals: true, showGifts: true, giftsText: "", giftsInfo: "",
+  theme: "tuscany", lang: "en", langs: ["en", "ro", "no"], music: true, showMeals: true, openParty: 4, petals: true, florals: true, showGifts: true, giftsText: "", giftsInfo: "", opening: "seal", paper: "smooth",
   p1: "Elena", p2: "Matteo", date: "2027-06-12", time: "16:00",
   venue: "Villa Aurelia", city: "Lake Como, Italy", address: "Villa Aurelia, Lake Como, Italy",
   dress: "Black tie optional", rsvpby: "2027-04-01",
@@ -132,8 +133,10 @@ export function renderInvite(root, raw, opts = {}) {
   const f = features(opts.plan);
   const t = T[d.lang], th = THEMES[d.theme], v = th.v;
   const wasOpen = root.classList.contains("opened");
-  root.className = "inv" + (th.vintage ? " vint" : "") + (opts.keepOpen && wasOpen ? " opened" : "");
-  root.style.cssText = `${th.vintage ? `--i-band:${v.band};--i-band-ink:${v.bandInk};--i-lace:${v.lace};` : ""}--i-liner:${linerURL(d.theme)};--i-bg:${v.bg};--i-paper:${v.paper};--i-ink:${v.ink};--i-muted:${v.muted};--i-accent:${v.accent};--i-seal:${v.seal};--i-env:${v.env};--i-display:${th.display}`;
+  const gateKind = ["bow", "curtain"].includes(d.opening) ? d.opening : "";
+  root.className = "inv" + (th.vintage ? " vint" : "") + (gateKind ? " has-gate" : "") + (opts.keepOpen && wasOpen ? " opened" : "");
+  root.dataset.paper = d.paper || "smooth";
+  root.style.cssText = `${th.vintage ? `--i-band:${v.band};--i-band-ink:${v.bandInk};--i-lace:${v.lace};` : ""}--i-liner:${linerURL(d.theme)};--i-bg:${v.bg};--i-paper:${v.paper};--i-ink:${v.ink};--i-muted:${v.muted};--i-accent:${v.accent};--i-seal:${v.seal};--i-env:${v.env};--i-display:${th.display}${PAPER_TILE.embossed ? `;--damask:${PAPER_TILE.embossed}` : ""}`;
   const maps = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(d.address || d.venue + " " + d.city);
   const sched = d.schedule.filter((s) => s.t || s.x || s.k).map((s) => `<li><time>${esc(s.t)}</time><span>${esc(s.x || t[s.k] || "")}</span></li>`).join("");
   const langs = f.multiLang ? d.langs.filter((l) => T[l]) : [];
@@ -147,7 +150,7 @@ export function renderInvite(root, raw, opts = {}) {
   const corners = (a, b) => fl ? `<div class="fl-c ${a}">${bouquet(id)}</div><div class="fl-c ${b}">${bouquet(id, { big: false })}</div>` : "";
 
   root.innerHTML = `
-  <div class="stage">
+  <div class="stage">${gateKind ? gateHTML(gateKind, `${esc(d.p1)} &amp; ${esc(d.p2)}`, esc(TAP_GATE[gateKind][d.lang] || TAP_GATE[gateKind].en)) : ""}
     ${corners("fl-tl", "fl-br")}
     ${g ? `<p class="kicker">${esc(t.dear.replace("{n}", g.name))}</p>` : ""}
     <div class="env">
@@ -225,6 +228,18 @@ export function renderInvite(root, raw, opts = {}) {
     setTimeout(() => burst(root), 2300);
     setTimeout(() => { root.classList.remove("opening"); open(); }, 5300);
   });
+  const gate = root.querySelector(".gate");
+  if (gate) {
+    const go = () => {
+      if (root.classList.contains("gating")) return;
+      if (musicOn) Music.start();
+      if (reduce) { open(); return; }
+      root.classList.add("gating");
+      setTimeout(() => { root.classList.remove("gating"); open(); }, GATE_MS[gateKind]);
+    };
+    gate.addEventListener("click", go);
+    gate.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+  }
   const mus = root.querySelector(".mus"); if (mus) mus.addEventListener("click", () => Music.toggle());
   root.querySelectorAll("[data-ilang]").forEach((b) => b.addEventListener("click", () => opts.onLang && opts.onLang(b.dataset.ilang)));
   const lb = root.querySelector(".lightbox");

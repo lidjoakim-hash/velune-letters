@@ -66,12 +66,15 @@ else {
     const t = new URLSearchParams(location.search).get("t");
     const { THEMES } = await import("../assets/themes.js");
     if (t && THEMES[t]) data.theme = t;
+    const sp = new URLSearchParams(location.search), o = sp.get("o"), pp = sp.get("p");
+    if (["seal", "bow", "curtain"].includes(o)) data.opening = o;
+    if (["smooth", "embossed", "linen", "watercolour"].includes(pp)) data.paper = pp;
     const cta = document.createElement("a"); cta.className = "demo-cta";
     cta.href = `../studio.html?theme=${encodeURIComponent(data.theme)}&utm_source=instagram&utm_medium=dm&utm_campaign=demo`;
     cta.innerHTML = `<span><b>Love it?</b> Make it yours</span><em>From €69 →</em>`;
     document.body.appendChild(cta);
     const show = () => setTimeout(() => cta.classList.add("on"), 5500);
-    holder.addEventListener("click", (e) => { if (e.target.closest(".seal")) show(); }, { once: false });
+    holder.addEventListener("click", (e) => { if (e.target.closest(".seal,.gate")) show(); }, { once: false });
     setTimeout(() => cta.classList.add("on"), 15000);
   }
   renderInvite(holder, data, opts);
