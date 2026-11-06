@@ -392,3 +392,7 @@
 .inv[data-paper=linen] .sheet{background-image:url(tex/linen.jpg);background-size:300px;background-blend-mode:multiply}
 .inv[data-paper=linen] .vsheet{background-image:url(tex/linen.jpg);background-size:300px;background-blend-mode:multiply}
 .inv[data-paper=watercolour] .sheet,.inv[data-paper=watercolour] .vsheet{background-image:radial-gradient(ellipse 60% 22% at 18% 12%,color-mix(in srgb,var(--i-accent) 16%,transparent),transparent 70%),radial-gradient(ellipse 50% 18% at 85% 38%,color-mix(in srgb,var(--i-seal) 12%,transparent),transparent 70%),radial-gradient(ellipse 70% 20% at 30% 70%,color-mix(in srgb,var(--i-accent) 12%,transparent),transparent 70%),radial-gradient(ellipse 55% 16% at 80% 92%,color-mix(in srgb,var(--i-seal) 10%,transparent),transparent 70%)}
+.iloop{display:block;margin:30px auto 26px;max-width:300px;padding:16px 18px;text-align:center;text-decoration:none;border:1px solid color-mix(in srgb,var(--i-accent) 35%,transparent);border-radius:12px;color:var(--i-ink);background:color-mix(in srgb,var(--i-paper) 85%,#fff)}
+.iloop span{display:block;font-family:var(--i-display);font-size:1.05rem}
+.iloop b{display:block;margin-top:4px;font-weight:500;font-size:.85rem;color:var(--i-accent)}
+.iloop small{display:block;margin-top:8px;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--i-muted)}

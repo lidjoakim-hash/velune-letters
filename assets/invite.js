@@ -124,8 +124,25 @@ function stdSheet({ d, t, fl, corners, langBtns }) {
     <p class="line std-follow">${esc(FOLLOW[d.lang] || FOLLOW.en)}</p>
     ${langBtns}
     ${fl ? `<div class="fl-end">${corners("fl-bl", "fl-br")}</div>` : ""}
-    <p class="ifoot">${esc(t.made)} <b>Velune Letters</b></p>
+    ${madeBy(d)}
   </article>`;
+}
+
+const LOOP = {
+  en: ["Getting married too?", "Design your own invitation, free"], ro: ["Vă căsătoriți și voi?", "Creați-vă propria invitație, gratuit"],
+  no: ["Skal dere også gifte dere?", "Lag deres egen invitasjon, gratis"], it: ["Vi sposate anche voi?", "Create il vostro invito, gratis"],
+  es: ["¿También os casáis?", "Diseñad vuestra invitación gratis"], fr: ["Vous aussi, vous vous mariez ?", "Créez votre faire-part, gratuitement"],
+  de: ["Ihr heiratet auch?", "Gestaltet eure Einladung kostenlos"], pt: ["Também se vão casar?", "Criem o vosso convite, grátis"],
+  sv: ["Ska ni också gifta er?", "Skapa er egen inbjudan, gratis"], da: ["Skal I også giftes?", "Lav jeres egen invitation, gratis"],
+  pl: ["Też bierzecie ślub?", "Zaprojektujcie swoje zaproszenie za darmo"], nl: ["Gaan jullie ook trouwen?", "Ontwerp jullie eigen uitnodiging, gratis"] };
+function madeBy(d) {
+  const t = T[d.lang], l = LOOP[d.lang] || LOOP.en;
+  const onGuestPage = typeof location !== "undefined" && /\/i\/?$/.test(location.pathname.replace(/index\.html$/, ""));
+  if (!onGuestPage) return `<p class="ifoot">${esc(t.made)} <b>Velune Letters</b></p>`;
+  const home = new URL(["ro", "no", "it"].includes(d.lang) ? `../${d.lang}/` : "../", location.href);
+  const slug = (location.search.slice(1).split("&")[0] || "invite").replace(/[^a-z0-9-]/gi, "");
+  home.search = `utm_source=invite&utm_medium=footer&utm_campaign=${slug}`;
+  return `<a class="iloop" href="${home}" target="_blank" rel="noopener"><span>${esc(l[0])}</span><b>${esc(l[1])} →</b><small>${esc(t.made)} Velune Letters</small></a>`;
 }
 
 export function renderInvite(root, raw, opts = {}) {
@@ -209,7 +226,7 @@ export function renderInvite(root, raw, opts = {}) {
     </div>
     ${langBtns}
     ${fl ? `<div class="fl-end">${corners("fl-bl", "fl-br")}</div>` : ""}
-    <p class="ifoot">${esc(t.made)} <b>Velune Letters</b></p>
+    ${madeBy(d)}
   </article>
   `}
   ${d.petals ? `<canvas class="petals" aria-hidden="true"></canvas>` : ""}
@@ -344,7 +361,7 @@ function vintageSheet({ d, t, th, v, g, maps, musicOn, langBtns, photos }) {
       </div>
     </section>
     ${langBtns}
-    <footer class="vend">${S(stamp(v.paper, v.band, "WITH LOVE", "♥"), "s-stamp2")}${flourish(v.accent)}<p class="vnames small">${esc(d.p1)}<span>&amp;</span>${esc(d.p2)}</p><p class="ifoot">${esc(t.made)} <b>Velune Letters</b></p></footer>
+    <footer class="vend">${S(stamp(v.paper, v.band, "WITH LOVE", "♥"), "s-stamp2")}${flourish(v.accent)}<p class="vnames small">${esc(d.p1)}<span>&amp;</span>${esc(d.p2)}</p>${madeBy(d)}</footer>
   </article>`;
 }
 
