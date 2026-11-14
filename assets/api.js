@@ -9,12 +9,13 @@ export const LIVE = !!(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY);
 let GUEST = false;
 const local = () => !LIVE || GUEST;
 const GKEY = "vl-guest-db";
+const BUCKET = CONFIG.PHOTO_BUCKET || "photos";
 
 let sb = null;
 async function client() {
   if (sb) return sb;
   const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm");
-  sb = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: true, detectSessionInUrl: true } });
+  sb = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, { auth: { persistSession: true, detectSessionInUrl: true }, db: { schema: CONFIG.SUPABASE_SCHEMA || "public" } });
   return sb;
 }
 function check({ data, error }) {
@@ -218,12 +219,12 @@ export const api = {
     if (local()) return await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob); });
     const c = await client(); const u = await api.user();
     const path = `${u.id}/${invId}/${Date.now()}.jpg`;
-    check(await c.storage.from("photos").upload(path, blob, { contentType: "image/jpeg", upsert: false }));
-    return c.storage.from("photos").getPublicUrl(path).data.publicUrl;
+    check(await c.storage.from(BUCKET).upload(path, blob, { contentType: "image/jpeg", upsert: false }));
+    return c.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   },
   async deletePhoto(url) {
-    if (!LIVE || !url.includes("/storage/v1/object/public/photos/")) return;
-    const c = await client(); await c.storage.from("photos").remove([url.split("/storage/v1/object/public/photos/")[1]]);
+    if (!LIVE || !url.includes(`/storage/v1/object/public/${BUCKET}/`)) return;
+    const c = await client(); await c.storage.from(BUCKET).remove([url.split(`/storage/v1/object/public/${BUCKET}/`)[1]]);
   },
 
   /* ---- payments ---- */
