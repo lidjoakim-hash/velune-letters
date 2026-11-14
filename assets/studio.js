@@ -33,7 +33,7 @@ function download(name, blob) { const a = document.createElement("a"); a.href = 
 const slugify = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ø/g, "o").replace(/æ/g, "ae").replace(/å/g, "a").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
 
 /* ================= state ================= */
-let user = null, isAdmin = false;
+let user = null, isAdmin = false, migrating = null;
 let inv = null, guests = [], rsvps = [], tab = "design", pollTimer = null;
 
 async function boot() {
@@ -45,7 +45,29 @@ async function boot() {
 async function start() {
   Music.stop(); clearInterval(pollTimer);
   $("#nav-out").hidden = !user; $("#nav-list").hidden = !user;
-  if (!user) return renderLogin();
+  if (!user) {
+    if (!LIVE) return renderLogin();
+    // live site, not logged in: design first, log in only to save and publish
+    api.setGuest(true); isAdmin = false; $("#nav-admin").hidden = true;
+    const gid = params.get("id");
+    if (gid) { try { await api.getInvitation(gid); return openWorkspace(gid); } catch (e) { params.delete("id"); history.replaceState(null, "", "studio.html"); } }
+    return renderList();
+  }
+  api.setGuest(false);
+  if (params.get("draft") && !api.hasGuestDrafts()) {
+    let d = null; try { d = b64d(params.get("draft")); } catch (e) {}
+    params.delete("draft"); history.replaceState(null, "", "studio.html" + (params.toString() ? "?" + params : ""));
+    if (d) {
+      const data = withDefaults(d), slug = slugify(`${data.p1}-${data.p2}`) + "-" + Math.random().toString(36).slice(2, 6);
+      try { const row = await api.createInvitation(slug, data); toast("Your design is saved to your account"); return openWorkspace(row.id, true, "publish"); } catch (e) { toast(e.message); }
+    }
+  }
+  if (params.get("draft")) { params.delete("draft"); history.replaceState(null, "", "studio.html" + (params.toString() ? "?" + params : "")); }
+  if (api.hasGuestDrafts()) {
+    migrating = migrating || api.migrateGuest();
+    try { const row = await migrating; migrating = null; if (row) { toast("Your design is saved to your account"); return openWorkspace(row.id, true, "publish"); } }
+    catch (e) { migrating = null; toast(e.message); }
+  }
   try { isAdmin = await api.isAdmin(); } catch (e) { isAdmin = false; }
   $("#nav-admin").hidden = !isAdmin;
   let id = params.get("id");
@@ -61,7 +83,7 @@ window.addEventListener("popstate", () => { const p = new URLSearchParams(locati
 function renderLogin(sentTo) {
   app.innerHTML = `<div class="wrap"><div class="center-card">
     <p class="eyebrow">Velune Letters studio</p>
-    <h1>${sentTo ? "Check your email" : "Log in to design"}</h1>
+    <h1>${sentTo ? "Check your email" : "Log in"}</h1>
     ${sentTo ? `<p>We sent a login link to <b>${esc(sentTo)}</b>. Open it on this device to continue.</p><button class="btn ghost small" id="again" style="margin-top:20px">Use another email</button>` : `
     <p>No password needed. We email you a link that logs you in.</p>
     <form id="login" novalidate>
@@ -81,6 +103,41 @@ function renderLogin(sentTo) {
   };
 }
 
+/* the design also travels inside the email link, so it survives opening the link in another browser (e.g. from Instagram) */
+const b64e = (o) => { const b = new TextEncoder().encode(JSON.stringify(o)); let s = ""; b.forEach((x) => (s += String.fromCharCode(x))); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); };
+const b64d = (t) => { const s = atob(t.replace(/-/g, "+").replace(/_/g, "/")); return JSON.parse(new TextDecoder().decode(Uint8Array.from(s, (c) => c.charCodeAt(0)))); };
+function draftQuery() {
+  const base = withDefaults({}), diff = {};
+  for (const k of Object.keys(inv.data)) if (k !== "request" && k !== "photos" && JSON.stringify(inv.data[k]) !== JSON.stringify(base[k])) diff[k] = inv.data[k];
+  const q = "?draft=" + b64e(diff) + (params.get("plan") ? "&plan=" + encodeURIComponent(params.get("plan")) : "");
+  return q.length < 6000 ? q : (params.get("plan") ? "?plan=" + encodeURIComponent(params.get("plan")) : "");
+}
+
+/* guests save their design by email, then choose a plan */
+function guestSave(pane, sentTo) {
+  const want = params.get("plan") && PLANS[params.get("plan")] ? PLANS[params.get("plan")] : null;
+  pane.innerHTML = `<div class="panel" style="margin-top:0">
+    <h2>${sentTo ? "Check your email" : "Save your invitation"}</h2>
+    ${sentTo ? `<p>We sent a link to <b>${esc(sentTo)}</b>. Open it <b>on this device</b> and your design is saved to your account, ready to publish.</p><button class="btn small ghost" id="gagain" style="margin-top:12px">Use another email</button>` : `
+    <p>Enter your email to save your design${want ? ` and continue to ${esc(want.name)} (${euro(want.price)})` : ""}. No password, we email you a link.</p>
+    <form id="gform" novalidate style="margin-top:14px">
+      <label class="f">Email<input type="email" id="gemail" autocomplete="email" required placeholder="you@example.com"></label>
+      <p class="msg err" id="gerr" hidden></p>
+      <button class="btn primary" type="submit">Save and continue</button>
+    </form>
+    <p class="hint" style="margin-top:14px">You pay once when you publish: Essential ${euro(PLANS.essential.price)}, Signature ${euro(PLANS.signature.price)}. Card, Apple Pay and Google Pay by Stripe.</p>`}
+  </div>`;
+  if (sentTo) { $("#gagain").onclick = () => guestSave(pane); return; }
+  $("#gform").onsubmit = async (e) => {
+    e.preventDefault();
+    const email = $("#gemail").value.trim(), err = $("#gerr");
+    if (!/^\S+@\S+\.\S+$/.test(email)) { err.textContent = "Please enter a valid email address."; err.hidden = false; return; }
+    const b = $("#gform button"); b.disabled = true; b.textContent = "Sending…";
+    try { await api.signIn(email, draftQuery()); guestSave(pane, email); }
+    catch (ex) { err.textContent = ex.message; err.hidden = false; b.disabled = false; b.textContent = "Save and continue"; }
+  };
+}
+
 /* ================= list ================= */
 async function renderList() {
   app.innerHTML = `<div class="wrap app"><div class="empty">Loading your invitations…</div></div>`;
@@ -88,7 +145,7 @@ async function renderList() {
   try { list = await api.listInvitations(); } catch (e) { app.innerHTML = `<div class="wrap app"><p class="msg err">${esc(e.message)}</p></div>`; return; }
   if (!list.length && (params.get("theme") || params.get("plan"))) return newInvitation();
   app.innerHTML = `<div class="wrap app">
-    <div class="app-head"><div><p class="eyebrow">Your studio</p><h1>My invitations</h1></div><p style="color:var(--muted)">${esc(user.email)}</p></div>
+    <div class="app-head"><div><p class="eyebrow">Your studio</p><h1>My invitations</h1></div><p style="color:var(--muted)">${user ? esc(user.email) : `Designing as a guest · <a href="#" id="glogin" style="color:var(--accent)">Log in</a>`}</p></div>
     <div class="cards">
       ${list.map((i) => { const d = withDefaults(i.data); return `<button class="icard" data-id="${i.id}">
         <canvas data-motif="${d.theme}"></canvas>
@@ -100,13 +157,14 @@ async function renderList() {
   $$(".icard canvas", app).forEach((c) => draw(c, c.dataset.motif));
   $$(".icard[data-id]", app).forEach((b) => (b.onclick = () => openWorkspace(b.dataset.id, true)));
   $("#new").onclick = newInvitation;
+  if ($("#glogin")) $("#glogin").onclick = (e) => { e.preventDefault(); renderLogin(); };
 }
 async function newInvitation() {
   const data = withDefaults({ theme: THEMES[params.get("theme")] ? params.get("theme") : "tuscany" });
   let slug = slugify(`${data.p1}-${data.p2}`) + "-" + Math.random().toString(36).slice(2, 6);
   try {
     const row = await api.createInvitation(slug, data);
-    openWorkspace(row.id, true, params.get("plan") ? "publish" : "details");
+    openWorkspace(row.id, true, params.get("plan") && !api.guest ? "publish" : "design");
   } catch (e) { toast(e.message); }
 }
 
@@ -154,7 +212,8 @@ function renderWorkspace() {
       ${inv.plan ? `<span class="tag">${esc(PLANS[inv.plan].name)}${inv.comp ? " · gifted" : ""}</span>` : ""}
       <span class="saving" id="saving" aria-live="polite"></span>
     </div>
-    <div class="linkbox" style="margin-top:10px;width:fit-content">
+    ${api.guest ? `<p class="msg" style="margin-top:10px;max-width:640px">You're designing as a guest. It's free and saved in this browser. When you're happy, go to <b>Publish</b> and enter your email to save it and send it to your guests.</p>` : ""}
+    <div class="linkbox" style="margin-top:10px;width:fit-content${api.guest ? ";display:none" : ""}">
       <code id="link">${esc(link.replace(/^https?:\/\//, ""))}</code>
       <button class="btn small" id="copy-link">Copy</button>
       <a class="btn small ghost" href="${esc(link)}" target="_blank" rel="noopener">${live ? "Open" : "Preview"}</a>
@@ -166,7 +225,7 @@ function renderWorkspace() {
       <div id="pane"></div>
       <div class="preview">
         <div class="phone"><div class="screen" id="screen"><div id="pv"></div></div></div>
-        <div class="row"><button class="btn small" id="replay">Replay opening</button><a class="btn small primary" href="${esc(link)}" target="_blank" rel="noopener">Open on full screen</a></div>
+        <div class="row"><button class="btn small" id="replay">Replay opening</button>${api.guest ? "" : `<a class="btn small primary" href="${esc(link)}" target="_blank" rel="noopener">Open on full screen</a>`}</div>
         ${!inv.plan ? `<p style="font-size:.8rem;color:var(--muted);text-align:center;max-width:300px">The preview shows every Signature feature. Essential shows one language without music and photos.</p>` : ""}
       </div>
     </div></div>`;
@@ -410,6 +469,7 @@ function drawQR(canvas, text) {
 }
 function panePublish() {
   const pane = $("#pane"), live = inv.status === "live", paid = !!inv.paid_at, link = inviteUrl(inv.slug);
+  if (api.guest) return guestSave(pane);
   const curIdx = inv.plan ? PLAN_ORDER.indexOf(inv.plan) : -1;
   const plans = PLAN_ORDER.map((k, i) => {
     const p = PLANS[k], current = k === inv.plan, lower = i < curIdx;
