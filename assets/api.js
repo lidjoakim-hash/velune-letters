@@ -4,6 +4,11 @@ import { CONFIG, siteUrl } from "./config.js";
 import { DEFAULT_DATA, clone } from "./invite.js";
 
 export const LIVE = !!(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY);
+// Guest mode: live site, not logged in yet. Drafts are kept in this browser
+// and moved to the couple's account when they log in to publish.
+let GUEST = false;
+const local = () => !LIVE || GUEST;
+const GKEY = "vl-guest-db";
 
 let sb = null;
 async function client() {
@@ -21,14 +26,15 @@ function check({ data, error }) {
 }
 
 /* ===================== demo store ===================== */
-const KEY = "vl-demo-db";
+const DKEY = "vl-demo-db";
+const keyName = () => (GUEST ? GKEY : DKEY);
 const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
 const code = () => Math.random().toString(36).slice(2, 12);
 function load() {
-  try { const v = JSON.parse(localStorage.getItem(KEY)); if (v && v.invitations) return v; } catch (e) {}
+  try { const v = JSON.parse(localStorage.getItem(keyName())); if (v && v.invitations) return v; } catch (e) {}
   return { user: null, invitations: [], guests: [], rsvps: [], payments: [] };
 }
-function persist(db) { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { throw new Error("Your browser storage is full. Remove some photos and try again."); } }
+function persist(db) { try { localStorage.setItem(keyName(), JSON.stringify(db)); } catch (e) { throw new Error("Your browser storage is full. Remove some photos and try again."); } }
 const now = () => new Date().toISOString();
 
 export const DEMO_EXAMPLE = {
@@ -39,6 +45,30 @@ export const DEMO_EXAMPLE = {
 /* ===================== API ===================== */
 export const api = {
   live: LIVE,
+  setGuest(v) { GUEST = !!v && LIVE; },
+  get guest() { return GUEST; },
+  hasGuestDrafts() { try { const v = JSON.parse(localStorage.getItem(GKEY)); return !!(v && v.invitations && v.invitations.length); } catch (e) { return false; } },
+  // moves designs made before login into the couple's account; returns the last one
+  async migrateGuest() {
+    let db = null; try { db = JSON.parse(localStorage.getItem(GKEY)); } catch (e) {}
+    if (!LIVE || !db || !db.invitations || !db.invitations.length) return null;
+    const c = await client(); let last = null;
+    for (const i of db.invitations) {
+      let row = null, slug = i.slug;
+      for (let n = 0; n < 4 && !row; n++) {
+        const r = await c.from("invitations").insert({ slug, data: i.data }).select().single();
+        if (!r.error) row = r.data;
+        else if (r.error.code === "23505") slug = i.slug.replace(/-[a-z0-9]{4}$/, "") + "-" + Math.random().toString(36).slice(2, 6);
+        else throw new Error(r.error.message || "Could not save your design.");
+      }
+      if (!row) continue;
+      const gs = db.guests.filter((g) => g.invitation_id === i.id).map((g) => ({ invitation_id: row.id, name: g.name, party: g.party, contact: g.contact || null }));
+      if (gs.length) check(await c.from("guests").insert(gs));
+      last = row;
+    }
+    try { localStorage.removeItem(GKEY); } catch (e) {}
+    return last;
+  },
 
   /* ---- auth ---- */
   async user() {
@@ -51,10 +81,10 @@ export const api = {
     const c = await client();
     c.auth.onAuthStateChange((_e, s) => cb(s ? { id: s.user.id, email: s.user.email } : null));
   },
-  async signIn(email) {
+  async signIn(email, query) {
     if (!LIVE) { const db = load(); db.user = { id: "demo-user", email }; persist(db); return { demo: true }; }
     const c = await client();
-    check(await c.auth.signInWithOtp({ email, options: { emailRedirectTo: siteUrl() + "/studio.html" } }));
+    check(await c.auth.signInWithOtp({ email, options: { emailRedirectTo: siteUrl() + "/studio.html" + (query || "") } }));
     return { sent: true };
   },
   async signOut() {
@@ -62,13 +92,14 @@ export const api = {
     const c = await client(); await c.auth.signOut();
   },
   async isAdmin() {
+    if (GUEST) return false;
     if (!LIVE) return true;
     const c = await client(); return !!check(await c.rpc("is_admin"));
   },
 
   /* ---- invitations ---- */
   async listInvitations() {
-    if (!LIVE) {
+    if (local()) {
       const db = load();
       return db.invitations.map((i) => Object.assign({}, i, {
         replies: db.rsvps.filter((r) => r.invitation_id === i.id).length,
@@ -80,11 +111,11 @@ export const api = {
     return rows.map((i) => Object.assign(i, { replies: i.rsvps.length, coming: i.rsvps.filter((r) => r.attending).reduce((a, r) => a + r.party, 0) }));
   },
   async getInvitation(id) {
-    if (!LIVE) { const i = load().invitations.find((x) => x.id === id); if (!i) throw new Error("Invitation not found."); return i; }
+    if (local()) { const i = load().invitations.find((x) => x.id === id); if (!i) throw new Error("Invitation not found."); return i; }
     const c = await client(); return check(await c.from("invitations").select("*").eq("id", id).single());
   },
   async createInvitation(slug, data) {
-    if (!LIVE) {
+    if (local()) {
       const db = load();
       if (db.invitations.some((i) => i.slug === slug)) throw new Error("That link is already taken. Try another one.");
       const row = { id: uuid(), slug, data, plan: null, status: "draft", paid_at: null, comp: false, created_at: now(), updated_at: now(), owner_email: db.user && db.user.email };
@@ -93,7 +124,7 @@ export const api = {
     const c = await client(); return check(await c.from("invitations").insert({ slug, data }).select().single());
   },
   async updateInvitation(id, patch) {
-    if (!LIVE) {
+    if (local()) {
       const db = load(); const i = db.invitations.find((x) => x.id === id);
       if (!i) throw new Error("Invitation not found.");
       if (patch.slug && patch.slug !== i.slug) {
@@ -106,43 +137,43 @@ export const api = {
     const c = await client(); return check(await c.from("invitations").update(patch).eq("id", id).select().single());
   },
   async deleteInvitation(id) {
-    if (!LIVE) { const db = load(); db.invitations = db.invitations.filter((i) => i.id !== id); db.guests = db.guests.filter((g) => g.invitation_id !== id); db.rsvps = db.rsvps.filter((r) => r.invitation_id !== id); persist(db); return; }
+    if (local()) { const db = load(); db.invitations = db.invitations.filter((i) => i.id !== id); db.guests = db.guests.filter((g) => g.invitation_id !== id); db.rsvps = db.rsvps.filter((r) => r.invitation_id !== id); persist(db); return; }
     const c = await client(); check(await c.from("invitations").delete().eq("id", id));
   },
 
   /* ---- guests ---- */
   async listGuests(invId) {
-    if (!LIVE) return load().guests.filter((g) => g.invitation_id === invId).sort((a, b) => a.created_at.localeCompare(b.created_at));
+    if (local()) return load().guests.filter((g) => g.invitation_id === invId).sort((a, b) => a.created_at.localeCompare(b.created_at));
     const c = await client(); return check(await c.from("guests").select("*").eq("invitation_id", invId).order("created_at"));
   },
   async addGuests(invId, rows) {
     rows = rows.map((r) => ({ invitation_id: invId, name: String(r.name).slice(0, 120), party: Math.max(1, Math.min(20, +r.party || 1)), contact: (r.contact || "").slice(0, 200) || null }));
-    if (!LIVE) { const db = load(); const out = rows.map((r) => Object.assign({ id: uuid(), code: code(), opened_at: null, open_count: 0, created_at: now() }, r)); db.guests.push(...out); persist(db); return out; }
+    if (local()) { const db = load(); const out = rows.map((r) => Object.assign({ id: uuid(), code: code(), opened_at: null, open_count: 0, created_at: now() }, r)); db.guests.push(...out); persist(db); return out; }
     const c = await client(); return check(await c.from("guests").insert(rows).select());
   },
   async updateGuest(id, patch) {
-    if (!LIVE) { const db = load(); const g = db.guests.find((x) => x.id === id); Object.assign(g, patch); persist(db); return g; }
+    if (local()) { const db = load(); const g = db.guests.find((x) => x.id === id); Object.assign(g, patch); persist(db); return g; }
     const c = await client(); return check(await c.from("guests").update(patch).eq("id", id).select().single());
   },
   async deleteGuest(id) {
-    if (!LIVE) { const db = load(); db.guests = db.guests.filter((g) => g.id !== id); db.rsvps.forEach((r) => { if (r.guest_id === id) r.guest_id = null; }); persist(db); return; }
+    if (local()) { const db = load(); db.guests = db.guests.filter((g) => g.id !== id); db.rsvps.forEach((r) => { if (r.guest_id === id) r.guest_id = null; }); persist(db); return; }
     const c = await client(); check(await c.from("guests").delete().eq("id", id));
   },
 
   /* ---- replies ---- */
   async listRsvps(invId) {
-    if (!LIVE) return load().rsvps.filter((r) => r.invitation_id === invId).sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+    if (local()) return load().rsvps.filter((r) => r.invitation_id === invId).sort((a, b) => b.updated_at.localeCompare(a.updated_at));
     const c = await client(); return check(await c.from("rsvps").select("*").eq("invitation_id", invId).order("updated_at", { ascending: false }));
   },
   async deleteRsvp(id) {
-    if (!LIVE) { const db = load(); db.rsvps = db.rsvps.filter((r) => r.id !== id); persist(db); return; }
+    if (local()) { const db = load(); db.rsvps = db.rsvps.filter((r) => r.id !== id); persist(db); return; }
     const c = await client(); check(await c.from("rsvps").delete().eq("id", id));
   },
 
   /* ---- public (guests) ---- */
   async publicInvitation(slug, gcode) {
     if (slug === "demo") return { ...clone(DEMO_EXAMPLE), guest: null, rsvp: null }; // reserved public example
-    if (!LIVE) {
+    if (local()) {
       const db = load(); const i = db.invitations.find((x) => x.slug === slug);
       if (!i || i.status !== "live") return null;
       let guest = null, rsvp = null;
@@ -159,7 +190,7 @@ export const api = {
   },
   async submitRsvp(slug, gcode, p) {
     if (slug === "demo") return { ok: true, demo: true }; // the public example never stores replies
-    if (!LIVE) {
+    if (local()) {
       const db = load(); const i = db.invitations.find((x) => x.slug === slug);
       if (!i) throw new Error("This invitation is not open for replies.");
       const g = gcode ? db.guests.find((x) => x.code === gcode && x.invitation_id === i.id) : null;
@@ -174,7 +205,7 @@ export const api = {
 
   // lets a logged-in couple preview their own draft from the guest link
   async ownerInvitationBySlug(slug) {
-    if (!LIVE) { const i = load().invitations.find((x) => x.slug === slug); return i ? { id: i.id, slug: i.slug, plan: i.plan, data: i.data, guest: null, rsvp: null, draft: i.status !== "live" } : null; }
+    if (local()) { const i = load().invitations.find((x) => x.slug === slug); return i ? { id: i.id, slug: i.slug, plan: i.plan, data: i.data, guest: null, rsvp: null, draft: i.status !== "live" } : null; }
     const u = await api.user(); if (!u) return null;
     const c = await client(); const { data } = await c.from("invitations").select("id,slug,plan,data,status").eq("slug", slug).maybeSingle();
     return data ? { id: data.id, slug: data.slug, plan: data.plan, data: data.data, guest: null, rsvp: null, draft: data.status !== "live" } : null;
@@ -182,8 +213,9 @@ export const api = {
 
   /* ---- photos ---- */
   async uploadPhoto(invId, file) {
+    if (GUEST) throw new Error("Enter your email on the Publish tab to save your design, then you can add photos.");
     const blob = await resize(file, LIVE ? 1600 : 900, LIVE ? 0.85 : 0.78);
-    if (!LIVE) return await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob); });
+    if (local()) return await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob); });
     const c = await client(); const u = await api.user();
     const path = `${u.id}/${invId}/${Date.now()}.jpg`;
     check(await c.storage.from("photos").upload(path, blob, { contentType: "image/jpeg", upsert: false }));
@@ -196,7 +228,8 @@ export const api = {
 
   /* ---- payments ---- */
   async checkout(invId, plan) {
-    if (!LIVE) {
+    if (GUEST) throw new Error("Enter your email first so we can save your invitation.");
+    if (local()) {
       const db = load(); const i = db.invitations.find((x) => x.id === invId);
       const prices = { essential: 6900, signature: 7900, atelier: 39000 };
       const paidBefore = i.paid_at && i.plan ? prices[i.plan] : 0;
@@ -223,7 +256,7 @@ export const api = {
 
   /* ---- admin ---- */
   async adminOverview() {
-    if (!LIVE) {
+    if (local()) {
       const db = load();
       return db.invitations.map((i) => ({
         id: i.id, slug: i.slug, status: i.status, plan: i.plan, comp: i.comp, paid_at: i.paid_at, created_at: i.created_at,
@@ -237,7 +270,7 @@ export const api = {
     const c = await client(); return check(await c.rpc("admin_overview"));
   },
   async adminSetPlan(id, plan, comp) {
-    if (!LIVE) { const db = load(); const i = db.invitations.find((x) => x.id === id); Object.assign(i, { plan, comp, paid_at: i.paid_at || now(), status: "live" }); persist(db); return; }
+    if (local()) { const db = load(); const i = db.invitations.find((x) => x.id === id); Object.assign(i, { plan, comp, paid_at: i.paid_at || now(), status: "live" }); persist(db); return; }
     const c = await client(); check(await c.rpc("admin_set_plan", { p_id: id, p_plan: plan, p_comp: comp }));
   },
 };
