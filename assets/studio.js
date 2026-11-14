@@ -7,7 +7,6 @@ const pend = { get() { try { return JSON.parse(localStorage.getItem("vl-pay") ||
 import { T, LANGS, fmtDate } from "./i18n.js";
 import { THEMES, draw } from "./themes.js";
 import { renderInvite, withDefaults, esc, Music, clone } from "./invite.js";
-import { OPENINGS, PAPERS } from "./openings.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -212,10 +211,6 @@ function paneDesign() {
   pane.innerHTML = `
     <div class="panel" style="margin-top:0"><h2>Design</h2><div class="chips">${Object.entries(THEMES).map(([id, th]) => `<button class="chip" aria-pressed="${id === d.theme}" data-theme="${id}"><span class="sw" style="background:linear-gradient(135deg,${th.v.accent} 50%,${th.v.paper} 50%)"></span>${esc(th.name)}</button>`).join("")}</div>
       <p class="hint" id="theme-tag">${esc(THEMES[d.theme].tag)}</p></div>
-    <div class="panel"><h2>Opening</h2><p class="hint" style="margin:0 0 10px">How guests open your invitation</p>
-      <div class="chips">${Object.entries(OPENINGS).map(([id, n]) => `<button class="chip" aria-pressed="${id === (d.opening || "seal")}" data-opening="${id}">${esc(n)}</button>`).join("")}</div>
-      <p class="hint" style="margin:16px 0 10px">Paper finish</p>
-      <div class="chips">${Object.entries(PAPERS).map(([id, n]) => `<button class="chip" aria-pressed="${id === (d.paper || "smooth")}" data-paper="${id}">${esc(n)}</button>`).join("")}</div>${locked("The bow, curtains and paper finishes")}</div>
     <div class="panel"><h2>Languages</h2>
       <p class="hint" style="margin:0 0 10px">Main language</p>
       <div class="chips">${LANGS.map((l) => `<button class="chip" aria-pressed="${l === d.lang}" data-lang="${l}">${esc(T[l].label)}</button>`).join("")}</div>
@@ -230,8 +225,6 @@ function paneDesign() {
         ${d.photos.length < 9 ? `<label class="add">+ Add photos<input type="file" accept="image/*" multiple id="addph" ${ess ? "disabled" : ""}></label>` : ""}</div>
       <p class="hint">Up to 9 photos. The first one is shown largest.</p>${locked("The photo gallery")}</div>`;
   $$("[data-theme]", pane).forEach((b) => (b.onclick = () => { d.theme = b.dataset.theme; $$("[data-theme]", pane).forEach((x) => x.setAttribute("aria-pressed", String(x === b))); $("#theme-tag").textContent = THEMES[d.theme].tag; change(); }));
-  $$("[data-opening]", pane).forEach((b) => (b.onclick = () => { d.opening = b.dataset.opening; $$("[data-opening]", pane).forEach((x) => x.setAttribute("aria-pressed", String(x === b))); change(); }));
-  $$("[data-paper]", pane).forEach((b) => (b.onclick = () => { d.paper = b.dataset.paper; $$("[data-paper]", pane).forEach((x) => x.setAttribute("aria-pressed", String(x === b))); change(); }));
   $$("[data-lang]", pane).forEach((b) => (b.onclick = () => { d.lang = b.dataset.lang; if (!d.langs.includes(d.lang)) d.langs.push(d.lang); paneDesign(); change(); }));
   $$("[data-langs]", pane).forEach((c) => (c.onchange = () => { const l = c.dataset.langs; d.langs = c.checked ? Array.from(new Set([...d.langs, l])) : d.langs.filter((x) => x !== l); if (!d.langs.includes(d.lang)) d.langs.push(d.lang); paneDesign(); change(); }));
   $("#music").onchange = (e) => { d.music = e.target.checked; change(); };
@@ -430,11 +423,7 @@ function panePublish() {
           <p>Print this QR code on save-the-date cards, or share the general link in a group chat. For personal greetings and tracking, send links from the Guests tab.</p>
           <div class="toolbar" style="margin-top:0"><button class="btn small primary" id="copy2">Copy general link</button><button class="btn small" id="qrdl">Download QR code</button>
           <a class="btn small ghost" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`${inv.data.p1} & ${inv.data.p2}: ${link}`)}">Share on WhatsApp</a></div>
-        </div></div>
-        ${inv.plan !== "essential" ? `<div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line)"><h3 style="margin:0 0 6px">Save the date</h3><p class="hint" style="margin:0 0 12px">A short matching card with your names, date, countdown and calendar buttons. Send it months ahead, then the full invitation later.</p>
-          <div class="toolbar" style="margin-top:0"><button class="btn small" id="copystd">Copy save-the-date link</button><a class="btn small ghost" target="_blank" rel="noopener" href="${esc(link + (link.includes("?") ? "&" : "?") + "std")}">Preview</a>
-          <a class="btn small ghost" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`${inv.data.p1} & ${inv.data.p2} · Save the date: ${link}${link.includes("?") ? "&" : "?"}std`)}">Share on WhatsApp</a></div></div>` : ""}
-      </div>
+        </div></div></div>
       ${curIdx < PLAN_ORDER.length - 1 ? `<div class="panel"><h2>Upgrade</h2><p class="hint" style="margin:0 0 16px">You only pay the difference.</p><div class="planrow">${plans}</div></div>` : ""}`
     : `<div class="panel" style="margin-top:0"><h2>Publish</h2><p>Choose a plan to make your invitation live. You pay once, and it stays online until 12 months after the wedding.</p>
       ${LINKS ? `<p class="hint">Secure card payment by Stripe. Booked Velune Weddings? Write to us and we'll gift you Signature.</p>` : PAY ? `<p class="hint">Booked Velune Weddings? Enter the code from your planner on the payment page and Signature is free.</p>` : `<p class="hint">Choose a plan and press Request. We confirm by email and publish within 24 hours.</p>`}</div>
@@ -457,7 +446,6 @@ function panePublish() {
   if (paid) {
     $("#toggle").onclick = async () => { try { const r = await api.updateInvitation(inv.id, { status: live ? "draft" : "live" }); inv.status = r.status; renderWorkspace(); toast(inv.status === "live" ? "Your invitation is live" : "Invitation paused"); } catch (e) { toast(e.message); } };
     $("#copy2").onclick = () => copy(link, "Link copied");
-    if ($("#copystd")) $("#copystd").onclick = () => copy(link + "&std", "Save-the-date link copied");
     const qc = $("#qr"); const ok = drawQR(qc, link);
     $("#qrdl").onclick = () => { if (!ok) return toast("QR code could not load. Check your connection."); qc.toBlob((b) => download(`qr-${inv.slug}.png`, b)); };
   }
