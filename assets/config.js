@@ -5,8 +5,12 @@
 // Find them in Supabase → Project Settings → API.
 // =====================================================================
 export const CONFIG = {
-  SUPABASE_URL: "https://hotkkzulmgmrmqzmvvsg.supabase.co",
-  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdGtrenVsbWdtcm1xem12dnNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1OTE4OTEsImV4cCI6MjEwOTE2Nzg5MX0.CLRXFqbItKPORWnf6N2DRcXiUYp37c-qVe-a4HCAz0U", // public key, safe here
+  SUPABASE_URL: "https://cqsoffgempmhudouaxrl.supabase.co",
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxc29mZmdlbXBtaHVkb3VheHJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyMzE4OTUsImV4cCI6MjEwOTgwNzg5NX0.DL_5RER83nIi1VQFxN0UiYaV3UaLNWYnhMLj5b55DwM", // public key, safe here
+
+  // Velune lives in its own "velune" schema inside the Vekst Supabase project.
+  SUPABASE_SCHEMA: "velune",
+  PHOTO_BUCKET: "velune-photos",
 
   // Your website address, without a slash at the end. Leave empty to use
   // whatever address the site is opened from.
